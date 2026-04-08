@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OVUM</string>
+
+    <!-- Login -->
+    <string name="label_usuario">Usuario</string>
+    <string name="hint_usuario">Nombre de usuario o correo</string>
+    <string name="label_contrasena">Contraseña</string>
+    <string name="hint_contrasena">Ingresa tu contraseña</string>
+    <string name="btn_iniciar_sesion">Iniciar sesión</string>
+    <string name="btn_registrarse">Registrarse</string>
+    <string name="error_campos_vacios">Por favor completa todos los campos</string>
+    <string name="error_correo_invalido">Correo electrónico inválido</string>
+    <string name="error_contrasena_corta">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_login">Correo o contraseña incorrectos</string>
+    <string name="cargando">Cargando...</string>
+
+    <!-- Dashboard -->
+    <string name="bienvenido">¡Bienvenido!</string>
+    <string name="selecciona_modulo">¿Qué módulo te gustaría visitar?</string>
+    <string name="modulo_inventario">Inventario</string>
+    <string name="modulo_aves">Gestión de Aves</string>
+    <string name="modulo_alimentacion">Control de Alimentación</string>
+    <string name="modulo_temperatura">Control de Temperatura</string>
+    <string name="modulo_medico">Registro Médico de Aves</string>
+    <string name="modulo_finanzas">Finanzas</string>
+    <string name="modulo_enfermedades">Diccionario de Enfermedades</string>
+    <string name="modulo_costos">Estimación de Costos</string>
+    <string name="btn_cerrar_sesion">Cerrar Sesión</string>
+    <string name="modulo_no_disponible">Módulo próximamente disponible</string>
+
+    <!-- Inventario -->
+    <string name="titulo_inventario">Inventario Avícola</string>
+    <string name="hint_buscar">Buscar productos...</string>
+    <string name="filtrar_por">Filtrar por:</string>
+    <string name="col_producto">Producto</string>
+    <string name="col_cantidad">Cantidad</string>
+    <string name="col_precio">Precio Unitario</string>
+    <string name="btn_anadir_producto">Añadir Producto</string>
+    <string name="titulo_anadir_editar">Añadir/Editar Producto</string>
+    <string name="label_nombre_producto">Nombre del Producto:</string>
+    <string name="label_cantidad_inicial">Cantidad Inicial:</string>
+    <string name="label_precio_unitario">Precio Unitario:</string>
+    <string name="label_fecha_vencimiento">Fecha de Vencimiento:</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="btn_guardar">Guardar Producto</string>
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_reportes">Reportes</string>
+    <string name="nav_config">Config.</string>
+    <string name="nav_salir">Salir</string>
+    <string name="producto_guardado">Producto guardado exitosamente</string>
+    <string name="producto_eliminado">Producto eliminado</string>
+    <string name="confirmar_eliminar">¿Eliminar este producto?</string>
+    <string name="error_campos_inventario">Completa nombre y cantidad</string>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "431500534662",
+    "project_id": "avicola-72459",
+    "storage_bucket": "avicola-72459.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431500534662:android:841b16caa1454c8c3e0207",
+        "android_client_info": {
+          "package_name": "com.universidad.avicola"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0snnjrV-Y2vtcIVwnVZKdVYYsr9TJgeo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

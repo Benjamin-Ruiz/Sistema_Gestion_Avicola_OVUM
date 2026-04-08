@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- dialog_ajustes.xml — Panel de Ajustes (Editar/Eliminar productos)
+     Ubicación: res/layout/dialog_ajustes.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/blanco">
+
+    <!-- Header -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:paddingHorizontal="20dp" android:paddingTop="20dp" android:paddingBottom="12dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:text="Ajustes de Inventario" android:textColor="@color/verde_oscuro"
+            android:textSize="18sp" android:textStyle="bold"/>
+        <ImageButton android:id="@+id/btnCerrarAjustes" android:layout_width="32dp"
+            android:layout_height="32dp" android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_cerrar" android:contentDescription="Cerrar"
+            android:tint="@color/gris_texto" android:padding="4dp"/>
+    </LinearLayout>
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp" android:layout_marginBottom="8dp"
+        android:text="Selecciona un producto para editarlo o eliminarlo"
+        android:textColor="@color/gris_hint" android:textSize="12sp"/>
+
+    <!-- Estado vacío -->
+    <TextView android:id="@+id/tvSinProductos"
+        android:layout_width="match_parent" android:layout_height="60dp"
+        android:gravity="center" android:text="No hay productos en el inventario"
+        android:textColor="@color/gris_hint" android:textSize="13sp" android:visibility="gone"/>
+
+    <!-- Lista de productos para ajustar -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerAjustes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="400dp"
+        android:nestedScrollingEnabled="true"
+        android:overScrollMode="never"/>
+
+    <Space android:layout_width="match_parent" android:layout_height="16dp"/>
+</LinearLayout>

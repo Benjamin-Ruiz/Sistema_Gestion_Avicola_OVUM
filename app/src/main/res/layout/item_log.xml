@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- item_log.xml — Entrada del historial de movimientos
+     Ubicación: res/layout/item_log.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="10dp"
+    android:paddingEnd="8dp">
+
+    <!-- Barra indicadora de color -->
+    <View android:id="@+id/viewIndicador"
+        android:layout_width="4dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="12dp"
+        android:background="@color/verde_primario"/>
+
+    <!-- Contenido -->
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:orientation="vertical">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+
+            <TextView android:id="@+id/tvLogCambio"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="15sp" android:textStyle="bold"
+                android:textColor="@color/verde_primario"/>
+
+            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+            <TextView android:id="@+id/tvLogFecha"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="11sp" android:textColor="@color/gris_hint"/>
+        </LinearLayout>
+
+        <TextView android:id="@+id/tvLogRazon"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textSize="12sp" android:textColor="@color/gris_texto"
+            android:layout_marginTop="2dp"/>
+    </LinearLayout>
+</LinearLayout>

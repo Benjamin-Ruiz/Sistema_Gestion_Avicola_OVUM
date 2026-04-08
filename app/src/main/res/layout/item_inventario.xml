@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- item_inventario.xml — Versión Pro
+     Ubicación: res/layout/item_inventario.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/rowContenido"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <!-- Columna nombre + categoría + indicador -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvNombreItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gris_texto"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/tvCategoriaItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="@color/verde_primario"
+                android:layout_marginTop="1dp"/>
+
+            <!-- Indicador de alerta (STOCK BAJO / VENCIDO / días) -->
+            <TextView
+                android:id="@+id/tvIndicador"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#E53935"
+                android:layout_marginTop="2dp"
+                android:visibility="gone"/>
+
+            <!-- Fecha de vencimiento -->
+            <TextView
+                android:id="@+id/tvFechaItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="@color/gris_hint"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <!-- Cantidad -->
+        <TextView
+            android:id="@+id/tvCantidadItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            android:textColor="@color/gris_texto"
+            android:textSize="12sp"
+            android:gravity="center"/>
+
+        <!-- Precio -->
+        <TextView
+            android:id="@+id/tvPrecioItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            android:textColor="@color/gris_texto"
+            android:textSize="12sp"
+            android:gravity="end"/>
+
+        <!-- Botón historial -->
+        <ImageButton
+            android:id="@+id/btnHistorial"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_reportes"
+            android:contentDescription="Historial"
+            android:tint="@color/verde_claro"
+            android:padding="6dp"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gris_borde"
+        android:layout_marginHorizontal="12dp"/>
+
+</LinearLayout>

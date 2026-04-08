@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- colors.xml — Versión Pro (reemplaza el existente)
+     Ubicación: res/values/colors.xml -->
+<resources>
+    <color name="verde_primario">#2D6A4F</color>
+    <color name="verde_oscuro">#1B4332</color>
+    <color name="verde_claro">#52B788</color>
+    <color name="verde_fondo">#D8F3DC</color>
+    <color name="verde_suave">#B7E4C7</color>
+    <color name="dorado">#F4A422</color>
+    <color name="blanco">#FFFFFF</color>
+    <color name="blanco_semi">#F0F4F1</color>
+    <color name="gris_texto">#4A4A4A</color>
+    <color name="gris_hint">#9E9E9E</color>
+    <color name="gris_borde">#DDDDDD</color>
+    <color name="rojo_salir">#E53935</color>
+    <color name="fondo_card">#FFFFFFEE</color>
+    <color name="transparente">#00000000</color>
+
+    <!-- Colores de alerta para el inventario -->
+    <color name="alerta_stock">#FFEBEE</color>       <!-- Rojo muy suave — stock crítico -->
+    <color name="alerta_naranja">#FFF3E0</color>     <!-- Naranja suave — próximo a vencer -->
+    <color name="alerta_vencido">#FCE4EC</color>     <!-- Rosa — vencido -->
+</resources>

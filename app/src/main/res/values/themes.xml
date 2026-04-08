@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.SistemaAvicola" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/verde_primario</item>
+        <item name="colorPrimaryVariant">@color/verde_oscuro</item>
+        <item name="colorOnPrimary">@color/blanco</item>
+        <item name="colorSecondary">@color/dorado</item>
+        <item name="colorOnSecondary">@color/blanco</item>
+        <item name="android:windowBackground">@color/blanco_semi</item>
+        <item name="android:statusBarColor">@color/verde_oscuro</item>
+        <item name="android:navigationBarColor">@color/verde_oscuro</item>
+    </style>
+
+    <!-- Estilo para campos de texto -->
+    <style name="Widget.Avicola.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/verde_claro</item>
+        <item name="boxBackgroundColor">@color/blanco</item>
+        <item name="hintTextColor">@color/verde_primario</item>
+        <item name="android:textColorHint">@color/gris_hint</item>
+    </style>
+
+    <!-- Botón primario verde -->
+    <style name="Widget.Avicola.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/verde_primario</item>
+        <item name="android:textColor">@color/blanco</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+    </style>
+
+    <!-- Botón secundario outline -->
+    <style name="Widget.Avicola.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/verde_primario</item>
+        <item name="android:textColor">@color/verde_primario</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+    </style>
+
+    <!-- Card de módulo en dashboard -->
+    <style name="Widget.Avicola.ModuleCard" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/fondo_card</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardUseCompatPadding">true</item>
+    </style>
+
+    <!-- Texto título de módulo -->
+    <style name="TextAppearance.Avicola.ModuleTitle" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textColor">@color/verde_oscuro</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- Texto subtítulo de módulo -->
+    <style name="TextAppearance.Avicola.ModuleSubtitle" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textColor">@color/gris_texto</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <!-- Botón Salir rojo en navbar -->
+    <style name="Widget.Avicola.Button.Salir" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/rojo_salir</item>
+        <item name="android:textColor">@color/blanco</item>
+        <item name="android:textSize">11sp</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+</resources>
