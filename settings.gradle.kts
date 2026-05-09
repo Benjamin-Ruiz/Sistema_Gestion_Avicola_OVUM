@@ -16,5 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AVICOLA1.1"
+rootProject.name = "OVUM"
 include(":app")

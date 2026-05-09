@@ -31,7 +31,7 @@ data class ProductoInventario(
 
     // ── Auditoría ─────────────────────────────────
     val fechaCreacion: Long = System.currentTimeMillis(),
-    val fechaActualizacion: Long = System.currentTimeMillis()
+    val fechaActualizacion: Long = System.currentTimeMillis(),
 ) {
     constructor() : this("", "", 0.0, 0.0, 0.0, Categoria.ALIMENTOS.name, "Unidades", "", 0L, 0L, 0L)
 

@@ -43,6 +43,15 @@
                 android:padding="4dp"/>
         </LinearLayout>
 
+        <!-- Categoría (AHORA PRIMERO) -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Categoría" android:textSize="13sp" android:textColor="@color/gris_texto"
+            android:textStyle="bold" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinnerCategoria"
+            android:layout_width="match_parent" android:layout_height="44dp"
+            android:background="@drawable/bg_spinner"
+            android:layout_marginBottom="14dp" android:paddingHorizontal="10dp"/>
+
         <!-- Nombre -->
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="Nombre del Producto *" android:textSize="13sp"
@@ -94,7 +103,8 @@
         </LinearLayout>
 
         <!-- Precio -->
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        <TextView android:id="@+id/tvPrecioLabel"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="Precio Unitario" android:textSize="13sp" android:textColor="@color/gris_texto"
             android:textStyle="bold" android:layout_marginBottom="4dp"/>
         <com.google.android.material.textfield.TextInputLayout
@@ -106,15 +116,6 @@
                 android:layout_height="wrap_content" android:inputType="numberDecimal"
                 android:textSize="14sp"/>
         </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Categoría -->
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Categoría" android:textSize="13sp" android:textColor="@color/gris_texto"
-            android:textStyle="bold" android:layout_marginBottom="4dp"/>
-        <Spinner android:id="@+id/spinnerCategoria"
-            android:layout_width="match_parent" android:layout_height="44dp"
-            android:background="@drawable/bg_spinner"
-            android:layout_marginBottom="14dp" android:paddingHorizontal="10dp"/>
 
         <!-- Unidad -->
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -139,8 +140,9 @@
                 android:hint="Ej: LOT-2024-001" android:textSize="14sp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Fecha de vencimiento -->
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        <!-- Fecha de vencimiento (SE PUEDE OCULTAR) -->
+        <TextView android:id="@+id/tvFechaLabel"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="Fecha de Vencimiento" android:textSize="13sp" android:textColor="@color/gris_texto"
             android:textStyle="bold" android:layout_marginBottom="4dp"/>
         <com.google.android.material.textfield.TextInputLayout

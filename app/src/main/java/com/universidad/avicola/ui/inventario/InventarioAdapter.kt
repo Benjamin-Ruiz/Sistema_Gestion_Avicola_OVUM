@@ -27,6 +27,7 @@ import java.util.Locale
  */
 class InventarioAdapter(
     private val onItemClick: (ProductoInventario) -> Unit,
+    private val onLongClick: (ProductoInventario) -> Unit,
     private val onHistorialClick: (ProductoInventario) -> Unit
 ) : ListAdapter<ProductoInventario, InventarioAdapter.ViewHolder>(DiffCallback()) {
 
@@ -85,6 +86,11 @@ class InventarioAdapter(
 
             // Click → editar producto
             b.rowContenido.setOnClickListener { onItemClick(p) }
+
+            b.rowContenido.setOnLongClickListener {
+                onLongClick(p)
+                true
+            }
 
             // Click en historial
             b.btnHistorial.setOnClickListener { onHistorialClick(p) }

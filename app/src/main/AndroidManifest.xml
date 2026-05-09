@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".AvicolaApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -39,12 +40,19 @@
              ─────────────────────────────── -->
         <activity
             android:name=".ui.inventario.InventarioActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!-- ───────────────────────────────
+             MÓDULO ACTIVO: GESTIÓN DE AVES
+             ─────────────────────────────── -->
+        <activity
+            android:name=".ui.aves.GestionAvesActivity"
             android:exported="false" />
 
         <!--
             MÓDULOS FUTUROS (descomentar cuando estén listos):
 
-        <activity android:name=".ui.aves.GestionAvesActivity" android:exported="false" />
         <activity android:name=".ui.alimentacion.AlimentacionActivity" android:exported="false" />
         <activity android:name=".ui.temperatura.TemperaturaActivity" android:exported="false" />
         <activity android:name=".ui.medico.RegistroMedicoActivity" android:exported="false" />

@@ -11,6 +11,7 @@ import com.google.firebase.ktx.Firebase
 import com.universidad.avicola.R
 import com.universidad.avicola.databinding.ActivityDashboardBinding
 import com.universidad.avicola.ui.auth.LoginActivity
+import com.universidad.avicola.ui.aves.GestionAvesActivity
 import com.universidad.avicola.ui.inventario.InventarioActivity
 
 /**
@@ -55,9 +56,13 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, InventarioActivity::class.java))
         }
 
+        // ✅ MÓDULO ACTIVO: Gestión de Aves
+        binding.cardGestionAves.setOnClickListener {
+            startActivity(Intent(this, GestionAvesActivity::class.java))
+        }
+
         // 🔒 Módulos próximamente disponibles
         val modulosInactivos = listOf(
-            binding.cardGestionAves,
             binding.cardAlimentacion,
             binding.cardTemperatura,
             binding.cardMedico,

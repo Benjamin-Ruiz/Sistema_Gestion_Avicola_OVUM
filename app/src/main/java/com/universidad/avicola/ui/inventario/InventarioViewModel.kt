@@ -1,31 +1,45 @@
 package com.universidad.avicola.ui.inventario
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
 import com.universidad.avicola.data.model.Categoria
 import com.universidad.avicola.data.model.ProductoInventario
 import com.universidad.avicola.data.repository.InventarioRepository
 import kotlinx.coroutines.launch
 
-/**
- * InventarioViewModel.kt — Versión Pro
- * ─────────────────────────────────────────────────────
- * Ubicación: app/src/main/java/com/universidad/avicola/ui/inventario/
- */
-class InventarioViewModel : ViewModel() {
+class InventarioViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = InventarioRepository()
+    private val repository = InventarioRepository(application)
 
-    // ── Datos crudos de Firestore ──────────────────
-    val productos: LiveData<List<ProductoInventario>> =
-        repository.obtenerProductos().asLiveData()
+    // Clase para el reporte
+    data class InventarioReporte(
+        val totalProductos: Int = 0,
+        val valorTotal: Double = 0.0,
+        val stockCritico: Int = 0,
+        val porVencer: Int = 0,
+        val vencidos: Int = 0,
+        val desgloseCategorias: Map<String, Int> = emptyMap(),
+        val listaCriticos: List<String> = emptyList(),
+        val listaPorVencer: List<String> = emptyList(),
+    )
 
-    // ── Estado de UI ───────────────────────────────
-    private val _productosFiltrados = MutableLiveData<List<ProductoInventario>>()
-    val productosFiltrados: LiveData<List<ProductoInventario>> = _productosFiltrados
+    private val _reporte = MediatorLiveData<InventarioReporte>(InventarioReporte())
+    val reporte: LiveData<InventarioReporte> = _reporte
+
+    // Datos de origen
+    private val _productosBase = repository.obtenerProductos().asLiveData()
+    
+    // Estados de filtros
+    private val textoBusqueda = MutableLiveData("")
+    private val categoriaFiltro = MutableLiveData<Categoria?>(null)
+    private val soloStockCritico = MutableLiveData(false)
+    private val soloProximosAVencer = MutableLiveData(false)
+    
+    // Filtros Avanzados
+    private val precioMin = MutableLiveData<Double?>(null)
+    private val precioMax = MutableLiveData<Double?>(null)
+    private val ordenarPor = MutableLiveData("Nombre")
 
     private val _mensaje = MutableLiveData<String>()
     val mensaje: LiveData<String> = _mensaje
@@ -33,83 +47,103 @@ class InventarioViewModel : ViewModel() {
     private val _cargando = MutableLiveData<Boolean>()
     val cargando: LiveData<Boolean> = _cargando
 
-    // ── Estado de filtros activos ──────────────────
-    private var textoBusqueda = ""
-    private var categoriaFiltro: Categoria? = null
-    private var soloStockCritico = false
-    private var soloProximosAVencer = false
+    // LiveData Mediador: Se actualiza automáticamente si cualquiera de los filtros o la base de datos cambia
+    val productosFiltrados = MediatorLiveData<List<ProductoInventario>>().apply {
+        val observer = Observer<Any?> {
+            val lista = _productosBase.value ?: emptyList()
+            value = filtrar(lista)
+            _reporte.value = calcularReporte(lista)
+        }
+        addSource(_productosBase, observer)
+        addSource(textoBusqueda, observer)
+        addSource(categoriaFiltro, observer)
+        addSource(soloStockCritico, observer)
+        addSource(soloProximosAVencer, observer)
+        addSource(precioMin, observer)
+        addSource(precioMax, observer)
+        addSource(ordenarPor, observer)
+    }
 
-    // ── Estadísticas para reportes ─────────────────
-    val totalProductos: Int get() = productos.value?.size ?: 0
-    val totalStockCritico: Int get() = productos.value?.count { it.isStockCritico() } ?: 0
-    val totalProximosVencer: Int get() = productos.value?.count { it.isProximoAVencer() } ?: 0
-    val valorTotalInventario: Double get() =
-        productos.value?.sumOf { it.cantidad * it.precioUnitario } ?: 0.0
+    private fun calcularReporte(lista: List<ProductoInventario>): InventarioReporte {
+        var valor = 0.0
+        var critico = 0
+        var porVencer = 0
+        var vencidos = 0
+        val categorias = mutableMapOf<String, Int>()
+        val criticosList = mutableListOf<String>()
+        val vencerList = mutableListOf<String>()
 
-    // ════════════════════════════════════════════════
-    //  FILTROS
-    // ════════════════════════════════════════════════
-
-    fun aplicarFiltros(lista: List<ProductoInventario>) {
-        var resultado = lista
-
-        if (textoBusqueda.isNotBlank()) {
-            resultado = resultado.filter {
-                it.nombre.lowercase().contains(textoBusqueda.lowercase())
+        lista.forEach { p ->
+            valor += (p.cantidad * p.precioUnitario)
+            if (p.isStockCritico()) {
+                critico++
+                criticosList.add("${p.nombre} (${p.cantidadConUnidad()})")
             }
-        }
-        if (categoriaFiltro != null) {
-            resultado = resultado.filter { it.categoria == categoriaFiltro!!.name }
-        }
-        if (soloStockCritico) {
-            resultado = resultado.filter { it.isStockCritico() }
-        }
-        if (soloProximosAVencer) {
-            resultado = resultado.filter { it.isProximoAVencer() || it.isVencido() }
+            if (p.isVencido()) vencidos++
+            else if (p.isProximoAVencer()) {
+                porVencer++
+                vencerList.add(p.nombre)
+            }
+            categorias[p.categoria] = (categorias[p.categoria] ?: 0) + 1
         }
 
-        // Ordenar: críticos primero, luego por nombre
-        resultado = resultado.sortedWith(
-            compareByDescending<ProductoInventario> { it.isStockCritico() }
-                .thenByDescending { it.isProximoAVencer() }
-                .thenBy { it.nombre }
+        return InventarioReporte(
+            totalProductos = lista.size,
+            valorTotal = valor,
+            stockCritico = critico,
+            porVencer = porVencer,
+            vencidos = vencidos,
+            desgloseCategorias = categorias,
+            listaCriticos = criticosList,
+            listaPorVencer = vencerList
         )
-
-        _productosFiltrados.value = resultado
     }
 
-    fun setBusqueda(texto: String) {
-        textoBusqueda = texto
-        aplicarFiltros(productos.value ?: emptyList())
+    private fun filtrar(lista: List<ProductoInventario>): List<ProductoInventario> {
+        val query = textoBusqueda.value?.lowercase() ?: ""
+        val cat = categoriaFiltro.value
+        val critico = soloStockCritico.value ?: false
+        val vencen = soloProximosAVencer.value ?: false
+        val pMin = precioMin.value
+        val pMax = precioMax.value
+        val orden = ordenarPor.value
+
+        val filtrada = lista.filter {
+            (query.isEmpty() || it.nombre.lowercase().contains(query)) &&
+            (cat == null || it.categoria == cat.name) &&
+            (!critico || it.isStockCritico()) &&
+            (!vencen || it.isProximoAVencer() || it.isVencido()) &&
+            (pMin == null || it.precioUnitario >= pMin) &&
+            (pMax == null || it.precioUnitario <= pMax)
+        }
+
+        return when (orden) {
+            "PrecioMenor" -> filtrada.sortedBy { it.precioUnitario }
+            "PrecioMayor" -> filtrada.sortedByDescending { it.precioUnitario }
+            "Cantidad" -> filtrada.sortedByDescending { it.cantidad }
+            else -> filtrada.sortedBy { it.nombre }
+        }
     }
 
-    fun setCategoria(categoria: Categoria?) {
-        categoriaFiltro = categoria
-        aplicarFiltros(productos.value ?: emptyList())
+    // Funciones para actualizar filtros
+    fun setBusqueda(texto: String) { textoBusqueda.value = texto }
+    fun setCategoria(categoria: Categoria?) { categoriaFiltro.value = categoria }
+    fun toggleStockCritico(activo: Boolean) { soloStockCritico.value = activo }
+    fun toggleProximosVencer(activo: Boolean) { soloProximosAVencer.value = activo }
+
+    fun aplicarFiltrosAvanzados(min: Double?, max: Double?, orden: String) {
+        precioMin.value = min
+        precioMax.value = max
+        ordenarPor.value = orden
     }
 
-    fun toggleStockCritico(activo: Boolean) {
-        soloStockCritico = activo
-        aplicarFiltros(productos.value ?: emptyList())
+    fun limpiarFiltrosAvanzados() {
+        precioMin.value = null
+        precioMax.value = null
+        ordenarPor.value = "Nombre"
     }
 
-    fun toggleProximosVencer(activo: Boolean) {
-        soloProximosAVencer = activo
-        aplicarFiltros(productos.value ?: emptyList())
-    }
-
-    fun limpiarFiltros() {
-        textoBusqueda = ""
-        categoriaFiltro = null
-        soloStockCritico = false
-        soloProximosAVencer = false
-        aplicarFiltros(productos.value ?: emptyList())
-    }
-
-    // ════════════════════════════════════════════════
-    //  CRUD
-    // ════════════════════════════════════════════════
-
+    // CRUD
     fun agregarProducto(producto: ProductoInventario) {
         viewModelScope.launch {
             _cargando.value = true
@@ -121,14 +155,10 @@ class InventarioViewModel : ViewModel() {
         }
     }
 
-    fun actualizarProducto(
-        actual: ProductoInventario,
-        nuevo: ProductoInventario,
-        reason: String = "Ajuste manual"
-    ) {
+    fun actualizarProducto(actual: ProductoInventario, nuevo: ProductoInventario, razon: String) {
         viewModelScope.launch {
             _cargando.value = true
-            repository.actualizarProducto(actual, nuevo, reason).fold(
+            repository.actualizarProducto(actual, nuevo, razon).fold(
                 onSuccess = { _mensaje.value = "✓ Producto actualizado" },
                 onFailure = { _mensaje.value = "Error: ${it.message}" }
             )
@@ -138,12 +168,7 @@ class InventarioViewModel : ViewModel() {
 
     fun eliminarProducto(id: String, nombre: String) {
         viewModelScope.launch {
-            _cargando.value = true
-            repository.eliminarProducto(id, nombre).fold(
-                onSuccess = { _mensaje.value = "Producto eliminado" },
-                onFailure = { _mensaje.value = "Error: ${it.message}" }
-            )
-            _cargando.value = false
+            repository.eliminarProducto(id, nombre)
         }
     }
 

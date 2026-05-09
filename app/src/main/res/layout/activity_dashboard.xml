@@ -73,14 +73,7 @@
                 android:textSize="26sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="24dp"
-                android:text="@string/selecciona_modulo"
-                android:textColor="@color/gris_texto"
-                android:textSize="14sp" />
+
 
             <!-- ══════════════════════════════════════ -->
             <!--  GRID DE MÓDULOS (2 columnas)          -->
@@ -150,7 +143,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_margin="6dp"
-                    android:alpha="0.65"
+                    android:foreground="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true">
 
@@ -186,7 +179,7 @@
                                 style="@style/TextAppearance.Avicola.ModuleSubtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Próximamente" />
+                                android:text="Gestión y monitoreo" />
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
