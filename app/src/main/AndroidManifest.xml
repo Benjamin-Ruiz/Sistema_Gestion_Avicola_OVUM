@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <!-- Permiso de internet para Firebase -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -49,6 +50,13 @@
         <activity
             android:name=".ui.aves.GestionAvesActivity"
             android:exported="false" />
+        <!-- Finanzas (NUEVO MÓDULO) -->
+        <activity
+            android:name=".ui.finanzas.FinanzasActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+
+
 
         <!--
             MÓDULOS FUTUROS (descomentar cuando estén listos):

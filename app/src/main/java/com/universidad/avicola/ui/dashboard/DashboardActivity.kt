@@ -13,6 +13,7 @@ import com.universidad.avicola.databinding.ActivityDashboardBinding
 import com.universidad.avicola.ui.auth.LoginActivity
 import com.universidad.avicola.ui.aves.GestionAvesActivity
 import com.universidad.avicola.ui.inventario.InventarioActivity
+import com.universidad.avicola.ui.finanzas.FinanzasActivity
 
 /**
  * DashboardActivity.kt
@@ -61,12 +62,18 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, GestionAvesActivity::class.java))
         }
 
+        // ✅ MÓDULO ACTIVO: Finanzas
+        binding.cardFinanzas.alpha = 1.0f       // quitar opacidad si la tenía
+        binding.cardFinanzas.setOnClickListener {
+            startActivity(Intent(this, FinanzasActivity::class.java))
+        }
+
         // 🔒 Módulos próximamente disponibles
         val modulosInactivos = listOf(
             binding.cardAlimentacion,
             binding.cardTemperatura,
             binding.cardMedico,
-            binding.cardFinanzas,
+            // binding.cardFinanzas,    // ← ya no está inactivo
             binding.cardEnfermedades,
             binding.cardCostos
         )
@@ -109,8 +116,8 @@ class DashboardActivity : AppCompatActivity() {
         finish()
     }
 
-    // Bloquear el botón atrás en el dashboard
+    @Suppress("MissingSuperCall", "DEPRECATION")
     override fun onBackPressed() {
-        // No hacer nada — el usuario debe usar "Cerrar sesión"
+        // Bloquear el botón atrás — el usuario debe usar "Cerrar sesión"
     }
 }

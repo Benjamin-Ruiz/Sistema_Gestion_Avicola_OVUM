@@ -52,4 +52,7 @@
     <string name="producto_eliminado">Producto eliminado</string>
     <string name="confirmar_eliminar">¿Eliminar este producto?</string>
     <string name="error_campos_inventario">Completa nombre y cantidad</string>
+
+    <string name="reportes">Reportes</string>
+    <string name="punto_equilibrio">Punto de equilibrio</string>
 </resources>
