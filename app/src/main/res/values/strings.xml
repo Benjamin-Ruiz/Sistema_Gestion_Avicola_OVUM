@@ -53,6 +53,7 @@
     <string name="confirmar_eliminar">¿Eliminar este producto?</string>
     <string name="error_campos_inventario">Completa nombre y cantidad</string>
 
-    <string name="reportes">Reportes</string>
+    <string name="reportes">Reporte financiero</string>
     <string name="punto_equilibrio">Punto de equilibrio</string>
+    <string name="cuentas_pendientes">Cuentas pendientes</string>
 </resources>

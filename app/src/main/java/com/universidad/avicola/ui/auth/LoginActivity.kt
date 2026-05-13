@@ -19,25 +19,19 @@ import com.universidad.avicola.ui.dashboard.DashboardActivity
  * Pantalla de autenticación del Sistema Avícola.
  * Usa Firebase Authentication (email + password).
  *
- * Coloca este archivo en:
- *   app/src/main/java/com/universidad/avicola/ui/auth/LoginActivity.kt
+ * Modificado: validación de estado de cuenta tras login.
  */
 class LoginActivity : AppCompatActivity() {
 
-    // ViewBinding — evita findViewById en toda la Activity
     private lateinit var binding: ActivityLoginBinding
-
-    // Instancia de Firebase Auth
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inflar el layout con ViewBinding
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inicializar Firebase Auth
         auth = Firebase.auth
 
         // Si el usuario ya inició sesión, ir directo al Dashboard
@@ -49,13 +43,10 @@ class LoginActivity : AppCompatActivity() {
         configurarBotones()
     }
 
-    // ──────────────────────────────────────────
-    //  Configuración de botones
-    // ──────────────────────────────────────────
     private fun configurarBotones() {
-
         // Botón Iniciar Sesión
         binding.btnIniciarSesion.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
             val correo = binding.etUsuario.text.toString().trim()
             val contrasena = binding.etContrasena.text.toString().trim()
 
@@ -78,9 +69,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // ──────────────────────────────────────────
-    //  Validación de campos
-    // ──────────────────────────────────────────
     private fun validarCampos(correo: String, contrasena: String): Boolean {
         var valido = true
 
@@ -104,20 +92,40 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // ──────────────────────────────────────────
-    //  Autenticación con Firebase
+    //  Autenticación con Firebase + validación de cuenta
     // ──────────────────────────────────────────
     private fun iniciarSesion(correo: String, contrasena: String) {
         mostrarCargando(true)
 
         auth.signInWithEmailAndPassword(correo, contrasena)
             .addOnCompleteListener(this) { task ->
-                mostrarCargando(false)
-
                 if (task.isSuccessful) {
-                    // Login exitoso → ir al Dashboard
-                    irAlDashboard()
+                    val user = auth.currentUser
+                    user?.reload()?.addOnCompleteListener { reloadTask ->
+                        mostrarCargando(false)
+                        if (reloadTask.isSuccessful) {
+                            if (user.isEmailVerified) {
+                                irAlDashboard()
+                            } else {
+                                Toast.makeText(
+                                    this,
+                                    "Revisa tu bandeja de correo y verifica para continuar.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                auth.signOut()
+                            }
+                        } else {
+                            Toast.makeText(
+                                this,
+                                "Error al verificar el estado de la cuenta. Intenta de nuevo.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            auth.signOut()
+                        }
+                    }
                 } else {
                     // Error de autenticación
+                    mostrarCargando(false)
                     binding.tilContrasena.error = getString(R.string.error_login)
                     Toast.makeText(this, getString(R.string.error_login), Toast.LENGTH_SHORT).show()
                 }
@@ -129,7 +137,6 @@ class LoginActivity : AppCompatActivity() {
     // ──────────────────────────────────────────
     private fun irAlDashboard() {
         val intent = Intent(this, DashboardActivity::class.java)
-        // Limpiar el backstack — no volver al Login con el botón atrás
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()

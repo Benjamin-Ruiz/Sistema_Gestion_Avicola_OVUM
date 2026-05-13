@@ -72,15 +72,29 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun registrarUsuario(correo: String, contrasena: String) {
         mostrarCargando(true)
-
         auth.createUserWithEmailAndPassword(correo, contrasena)
             .addOnCompleteListener(this) { task ->
                 mostrarCargando(false)
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show()
-                    finish() // Volver al Login
+                    val user = auth.currentUser
+                    user?.sendEmailVerification()
+                        ?.addOnCompleteListener { verifyTask ->
+                            if (verifyTask.isSuccessful) {
+                                Toast.makeText(this,
+                                    "Correo de verificación enviado a $correo. Revisa tu bandeja de entrada.",
+                                    Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(this,
+                                    "No se pudo enviar el correo de verificación",
+                                    Toast.LENGTH_SHORT).show()
+                            }
+                            auth.signOut()
+                            finish()
+                        }
                 } else {
-                    Toast.makeText(this, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this,
+                        "Error: ${task.exception?.message}",
+                        Toast.LENGTH_LONG).show()
                 }
             }
     }

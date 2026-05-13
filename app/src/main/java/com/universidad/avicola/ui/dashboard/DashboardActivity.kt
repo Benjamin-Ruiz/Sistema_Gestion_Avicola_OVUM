@@ -12,18 +12,14 @@ import com.universidad.avicola.R
 import com.universidad.avicola.databinding.ActivityDashboardBinding
 import com.universidad.avicola.ui.auth.LoginActivity
 import com.universidad.avicola.ui.aves.GestionAvesActivity
-import com.universidad.avicola.ui.inventario.InventarioActivity
 import com.universidad.avicola.ui.finanzas.FinanzasActivity
+import com.universidad.avicola.ui.inventario.InventarioActivity
 
 /**
  * DashboardActivity.kt
  * ─────────────────────────────────────────────
  * Pantalla de bienvenida con grid de módulos.
- * Solo el módulo Inventario está activo; los demás
- * muestran un Toast indicando "próximamente".
- *
- * Coloca este archivo en:
- *   app/src/main/java/com/universidad/avicola/ui/dashboard/DashboardActivity.kt
+ * Incluye validación de estado de cuenta (reload y email verificado).
  */
 class DashboardActivity : AppCompatActivity() {
 
@@ -43,8 +39,32 @@ class DashboardActivity : AppCompatActivity() {
             return
         }
 
-        configurarModulos()
-        configurarCerrarSesion()
+        val user = auth.currentUser!!
+        user.reload().addOnCompleteListener { reloadTask ->
+            if (reloadTask.isSuccessful) {
+                if (user.isEmailVerified) {
+                    // Cuenta verificada, configurar UI
+                    configurarModulos()
+                    configurarCerrarSesion()
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Debes verificar tu correo electrónico para acceder al sistema.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    auth.signOut()
+                    irAlLogin()
+                }
+            } else {
+                Toast.makeText(
+                    this,
+                    "No se pudo verificar el estado de la cuenta. Intenta de nuevo.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                auth.signOut()
+                irAlLogin()
+            }
+        }
     }
 
     // ──────────────────────────────────────────
@@ -63,7 +83,7 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         // ✅ MÓDULO ACTIVO: Finanzas
-        binding.cardFinanzas.alpha = 1.0f       // quitar opacidad si la tenía
+        binding.cardFinanzas.alpha = 1.0f
         binding.cardFinanzas.setOnClickListener {
             startActivity(Intent(this, FinanzasActivity::class.java))
         }
@@ -73,7 +93,6 @@ class DashboardActivity : AppCompatActivity() {
             binding.cardAlimentacion,
             binding.cardTemperatura,
             binding.cardMedico,
-            // binding.cardFinanzas,    // ← ya no está inactivo
             binding.cardEnfermedades,
             binding.cardCostos
         )
@@ -116,8 +135,9 @@ class DashboardActivity : AppCompatActivity() {
         finish()
     }
 
+    // Bloquear el botón atrás en el dashboard
     @Suppress("MissingSuperCall", "DEPRECATION")
     override fun onBackPressed() {
-        // Bloquear el botón atrás — el usuario debe usar "Cerrar sesión"
+        // No hacer nada — el usuario debe usar "Cerrar sesión"
     }
 }

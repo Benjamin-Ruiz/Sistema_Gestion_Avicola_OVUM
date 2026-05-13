@@ -16,6 +16,19 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        debug {
+            isMinifyEnabled = false
+        }
+    }
 
     buildFeatures {
         viewBinding = true
@@ -35,6 +48,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.security:security-crypto:1.1.0")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
