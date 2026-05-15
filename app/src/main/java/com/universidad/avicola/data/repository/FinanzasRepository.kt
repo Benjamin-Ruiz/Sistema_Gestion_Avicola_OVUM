@@ -1,8 +1,14 @@
 package com.universidad.avicola.data.repository
 
+import android.content.Context
+import android.net.Uri
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import com.universidad.avicola.AvicolaApp
 import com.universidad.avicola.data.model.CategoriaGasto
 import com.universidad.avicola.data.model.EstadoPago
 import com.universidad.avicola.data.model.Transaccion
@@ -12,30 +18,27 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import java.util.UUID
 
-/**
- * FinanzasRepository.kt
- * Ubicación: app/src/main/java/com/universidad/avicola/data/repository/
- *
- * Colección Firestore: "transacciones"
- */
 class FinanzasRepository {
 
     private val db = Firebase.firestore
     private val col = db.collection("transacciones")
+    private val storage = Firebase.storage
 
-    // ════════════════════════════════════════════════
-    //  READ — Tiempo real
-    // ════════════════════════════════════════════════
+    // Contexto para ContentResolver
+    private val context: Context
+        get() = AvicolaApp.instance.applicationContext
 
+    private fun currentUserId(): String = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+    // ── Lectura ──────────────────────────────────
     fun obtenerTransacciones(): Flow<List<Transaccion>> = callbackFlow {
         val listener = col
+            .whereEqualTo("userId", currentUserId())
             .orderBy("fechaMs", Query.Direction.DESCENDING)
             .addSnapshotListener { snap, error ->
-                if (error != null) {
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
+                if (error != null) { close(error); return@addSnapshotListener }
                 val lista = snap?.documents?.mapNotNull { doc ->
                     doc.toObject(Transaccion::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
@@ -55,12 +58,10 @@ class FinanzasRepository {
         val listener = col
             .whereGreaterThanOrEqualTo("fechaMs", inicio)
             .whereLessThan("fechaMs", fin)
+            .whereEqualTo("userId", currentUserId())
             .orderBy("fechaMs", Query.Direction.DESCENDING)
             .addSnapshotListener { snap, error ->
-                if (error != null) {
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
+                if (error != null) { close(error); return@addSnapshotListener }
                 val lista = snap?.documents?.mapNotNull { doc ->
                     doc.toObject(Transaccion::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
@@ -71,38 +72,37 @@ class FinanzasRepository {
 
     fun obtenerCuentasPendientes(): Flow<List<Transaccion>> = callbackFlow {
         val listener = col
+            .whereEqualTo("userId", currentUserId())
             .whereIn("estado", listOf(EstadoPago.PENDIENTE.name, EstadoPago.PARCIAL.name))
-            .orderBy("fechaMs", Query.Direction.DESCENDING)
             .addSnapshotListener { snap, error ->
-                if (error != null) {
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
+                if (error != null) { close(error); return@addSnapshotListener }
                 val lista = snap?.documents?.mapNotNull { doc ->
                     doc.toObject(Transaccion::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
-                trySend(lista)
+                // Ordenar manualmente por fecha descendente (sin índice)
+                trySend(lista.sortedByDescending { it.fechaMs })
             }
         awaitClose { listener.remove() }
     }
 
-    // ════════════════════════════════════════════════
-    //  CRUD
-    // ════════════════════════════════════════════════
-
+    // ── CRUD ─────────────────────────────────────
     suspend fun agregarTransaccion(t: Transaccion): Result<String> {
         return try {
-            val datos = transaccionToMap(t)
+            val transaccionConUserId = t.copy(userId = currentUserId())
+            val datos = transaccionToMap(transaccionConUserId)
+            Log.d("FinanzasRepo", "Guardando transacción con userId: ${currentUserId()}")
             val ref = col.add(datos).await()
+            Log.d("FinanzasRepo", "Transacción guardada con id: ${ref.id}")
             Result.success(ref.id)
         } catch (e: Exception) {
+            Log.e("FinanzasRepo", "Error al guardar transacción", e)
             Result.failure(e)
         }
     }
 
     suspend fun actualizarTransaccion(t: Transaccion): Result<Unit> {
         return try {
-            col.document(t.id).update(transaccionToMap(t)).await()
+            col.document(t.id).update(transaccionToMap(t.copy(userId = currentUserId()))).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -118,10 +118,27 @@ class FinanzasRepository {
         }
     }
 
-    /**
-     * Integración con Inventario: cuando se agrega una compra de alimento
-     * al inventario, se sugiere automáticamente un gasto en Finanzas.
-     */
+    // ── Subida de imagen a Storage ───────────────
+    suspend fun subirFotoRecibo(uri: Uri): Result<String> {
+        return try {
+            val storageRef = storage.reference
+                .child("recibos/${currentUserId()}/${UUID.randomUUID()}.jpg")
+
+            // Abrir InputStream desde el content URI
+            val inputStream = context.contentResolver.openInputStream(uri)
+                ?: return Result.failure(Exception("No se pudo abrir la imagen"))
+
+            val uploadTask = storageRef.putStream(inputStream).await()
+            val downloadUrl = uploadTask.storage.downloadUrl.await()
+            Log.d("FinanzasRepo", "Imagen subida: $downloadUrl")
+            Result.success(downloadUrl.toString())
+        } catch (e: Exception) {
+            Log.e("FinanzasRepo", "Error subiendo imagen", e)
+            Result.failure(e)
+        }
+    }
+
+    // ── Integraciones ────────────────────────────
     suspend fun sugerirGastoDesdeInventario(
         nombreProducto: String,
         monto: Double,
@@ -135,14 +152,12 @@ class FinanzasRepository {
             monto = monto,
             estado = EstadoPago.PAGADO.name,
             fechaMs = System.currentTimeMillis(),
-            productoInventarioId = productoId
+            productoInventarioId = productoId,
+            userId = currentUserId()
         )
         return agregarTransaccion(transaccion)
     }
 
-    /**
-     * Integración con Galpones: calcula pérdida económica por mortalidad
-     */
     suspend fun registrarPerdidaMortalidad(
         galponId: String,
         cantidadBajas: Int,
@@ -157,16 +172,15 @@ class FinanzasRepository {
             monto = perdida,
             estado = EstadoPago.PAGADO.name,
             fechaMs = System.currentTimeMillis(),
-            galponId = galponId
+            galponId = galponId,
+            userId = currentUserId()
         )
         return agregarTransaccion(transaccion)
     }
 
-    // ════════════════════════════════════════════════
-    //  HELPER (público, o puede ser privado si se usa solo aquí)
-    // ════════════════════════════════════════════════
-
+    // ── Helper ───────────────────────────────────
     private fun transaccionToMap(t: Transaccion): Map<String, Any> = mapOf(
+        "userId" to t.userId,
         "tipo" to t.tipo,
         "categoria" to t.categoria,
         "descripcion" to t.descripcion,

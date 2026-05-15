@@ -8,10 +8,16 @@ import java.util.concurrent.TimeUnit
 
 class AvicolaApp : Application() {
 
+    companion object {
+        lateinit var instance: AvicolaApp
+            private set
+    }
+
     val database by lazy { AppDatabase.getDatabase(this) }
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         setupPeriodicSync()
     }
 
