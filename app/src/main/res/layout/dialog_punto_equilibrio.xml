@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- dialog_punto_equilibrio.xml
+     Ubicación: res/layout/dialog_punto_equilibrio.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:overScrollMode="never">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp" android:background="@color/blanco">
+
+        <!-- Header -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="Punto de Equilibrio"
+                android:textColor="@color/verde_oscuro" android:textSize="18sp" android:textStyle="bold"/>
+            <ImageButton android:id="@+id/btnCerrarPE" android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_cerrar" android:contentDescription="Cerrar"
+                app:tint="@color/gris_texto" android:padding="4dp"/>   <!-- CORREGIDO -->
+        </LinearLayout>
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Calcula cuántas aves o huevos necesitas vender para cubrir todos tus gastos del mes."
+            android:textColor="@color/gris_texto" android:textSize="12sp"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Tipo de unidad -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Tipo de producción" android:textSize="13sp"
+            android:textColor="@color/gris_texto" android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <RadioGroup android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginBottom="16dp">
+            <RadioButton android:id="@+id/radioAves" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="Aves en pie" android:textColor="@color/gris_texto"
+                android:checked="true" android:buttonTint="@color/verde_primario"/>
+            <RadioButton android:id="@+id/radioHuevos" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="Docenas de huevo" android:textColor="@color/gris_texto"
+                android:buttonTint="@color/verde_primario"/>
+        </RadioGroup>
+
+        <!-- Gastos fijos -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Gastos Fijos del Mes (Q)" android:textSize="13sp"
+            android:textColor="@color/gris_texto" android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Avicola.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp" app:prefixText="Q ">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etGastosFijos" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="numberDecimal"
+                android:hint="Ej: 15000.00" android:textSize="14sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Precio de venta unitario -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Precio de Venta por Unidad (Q)" android:textSize="13sp"
+            android:textColor="@color/gris_texto" android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Avicola.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp" app:prefixText="Q ">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPrecioVenta" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="numberDecimal"
+                android:hint="Ej: 45.00 por ave" android:textSize="14sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Costo variable unitario -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Costo Variable por Unidad (Q)" android:textSize="13sp"
+            android:textColor="@color/gris_texto" android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Avicola.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp" app:prefixText="Q ">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCostoVariable" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="numberDecimal"
+                android:hint="Ej: 30.00 por ave" android:textSize="14sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Botón calcular -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCalcularPE"
+            style="@style/Widget.Avicola.Button.Primary"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Calcular Punto de Equilibrio"
+            android:textAllCaps="false" android:layout_marginBottom="16dp"/>
+
+        <!-- Resultado -->
+        <androidx.cardview.widget.CardView android:id="@+id/cardResultadoPE"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardElevation="3dp"
+            app:cardBackgroundColor="@color/verde_fondo"
+            android:visibility="gone">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Resultado" android:textColor="@color/verde_oscuro"
+                    android:textSize="14sp" android:textStyle="bold" android:layout_marginBottom="12dp"/>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:weightSum="2" android:layout_marginBottom="8dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Unidades a vender" android:textColor="@color/gris_texto"
+                            android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvUnidadesNecesarias"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textColor="@color/verde_oscuro" android:textSize="22sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical" android:gravity="end">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Ingreso necesario" android:textColor="@color/gris_texto"
+                            android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvIngresoNecesario"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textColor="@color/verde_oscuro" android:textSize="18sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Margen unitario:" android:textColor="@color/gris_texto"
+                    android:textSize="11sp"/>
+                <TextView android:id="@+id/tvMargenUnitario"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/verde_primario" android:textSize="14sp"
+                    android:textStyle="bold" android:layout_marginBottom="8dp"/>
+
+                <TextView android:id="@+id/tvInterpretacion"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="@color/gris_texto" android:textSize="12sp"
+                    android:lineSpacingMultiplier="1.4"
+                    android:background="@color/blanco"
+                    android:padding="10dp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+</ScrollView>

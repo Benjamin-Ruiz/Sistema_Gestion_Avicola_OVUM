@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- item_transaccion.xml
+     Ubicación: res/layout/item_transaccion.xml -->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardTx"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/blanco"
+    android:layout_marginBottom="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
+
+        <!-- Barra lateral de color -->
+        <View android:id="@+id/viewBarraLateral"
+            android:layout_width="5dp" android:layout_height="match_parent"
+            android:minHeight="60dp" android:background="@color/verde_primario"/>
+
+        <!-- Contenido -->
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical"
+            android:paddingVertical="12dp" android:paddingHorizontal="12dp">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical">
+
+                <TextView android:id="@+id/tvDescripcionTx"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:textColor="@color/gris_texto"
+                    android:textSize="14sp" android:textStyle="bold"
+                    android:maxLines="1" android:ellipsize="end"/>
+
+                <TextView android:id="@+id/tvMontoTx"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="15sp" android:textStyle="bold"
+                    android:textColor="@color/verde_primario"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
+
+                <TextView android:id="@+id/tvCategoriaTx"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:textColor="@color/gris_hint"
+                    android:textSize="11sp"/>
+
+                <TextView android:id="@+id/tvEstadoTx"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="10sp" android:textStyle="bold"
+                    android:paddingHorizontal="8dp" android:paddingVertical="2dp"
+                    android:background="@drawable/bg_estado_pagado"
+                    android:textColor="@color/blanco"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginTop="2dp">
+
+                <TextView android:id="@+id/tvFechaTx"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:textColor="@color/gris_hint"
+                    android:textSize="10sp"/>
+
+                <TextView android:id="@+id/tvContactoTx"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/gris_hint" android:textSize="10sp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

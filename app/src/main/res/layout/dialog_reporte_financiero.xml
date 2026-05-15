@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- dialog_reporte_financiero.xml
+     Ubicación: res/layout/dialog_reporte_financiero.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:overScrollMode="never">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp" android:background="@color/blanco">
+
+        <!-- Header -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="Reporte Financiero"
+                android:textColor="@color/verde_oscuro" android:textSize="18sp"
+                android:textStyle="bold"/>
+            <ImageButton android:id="@+id/btnCerrarReporte" android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_cerrar" android:contentDescription="Cerrar"
+                app:tint="@color/gris_texto" android:padding="4dp"/>   <!-- CORREGIDO -->
+        </LinearLayout>
+
+        <!-- Resumen de totales -->
+        <androidx.cardview.widget.CardView android:layout_width="match_parent"
+            android:layout_height="wrap_content" app:cardCornerRadius="12dp"
+            app:cardElevation="2dp" app:cardBackgroundColor="@color/verde_fondo"
+            android:layout_marginBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:weightSum="2" android:layout_marginBottom="10dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Ingresos" android:textColor="@color/gris_texto" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvRptIngresos"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Q0.00" android:textColor="@color/verde_primario"
+                            android:textSize="20sp" android:textStyle="bold"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical" android:gravity="end">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Gastos" android:textColor="@color/gris_texto" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvRptGastos"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Q0.00" android:textColor="@color/rojo_salir"
+                            android:textSize="20sp" android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:weightSum="2">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Beneficio Neto" android:textColor="@color/gris_texto" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvRptBeneficio"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                            android:textSize="18sp" android:textStyle="bold"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical" android:gravity="end">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="ROI" android:textColor="@color/gris_texto" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvRptRoi"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="0.0%" android:textColor="@color/verde_oscuro"
+                            android:textSize="18sp" android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Desglose por categoría -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Gastos por Categoría" android:textColor="@color/verde_oscuro"
+            android:textSize="14sp" android:textStyle="bold" android:layout_marginBottom="8dp"/>
+        <TextView android:id="@+id/tvRptDesgloseCat"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="@color/gris_texto" android:textSize="13sp"
+            android:lineSpacingMultiplier="1.5" android:layout_marginBottom="16dp"/>
+
+        <!-- Filtros de período -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Filtrar por Período" android:textColor="@color/verde_oscuro"
+            android:textSize="14sp" android:textStyle="bold" android:layout_marginBottom="8dp"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:weightSum="3" android:layout_marginBottom="16dp">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFiltroSemana"
+                style="@style/Widget.Avicola.Button.Secondary"
+                android:layout_width="0dp" android:layout_height="38dp"
+                android:layout_weight="1" android:layout_marginEnd="4dp"
+                android:text="Semana" android:textAllCaps="false" android:textSize="11sp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFiltroMes"
+                style="@style/Widget.Avicola.Button.Secondary"
+                android:layout_width="0dp" android:layout_height="38dp"
+                android:layout_weight="1" android:layout_marginHorizontal="4dp"
+                android:text="Mes" android:textAllCaps="false" android:textSize="11sp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFiltroAnio"
+                style="@style/Widget.Avicola.Button.Secondary"
+                android:layout_width="0dp" android:layout_height="38dp"
+                android:layout_weight="1" android:layout_marginStart="4dp"
+                android:text="Año" android:textAllCaps="false" android:textSize="11sp"/>
+        </LinearLayout>
+
+        <!-- Exportar -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Exportar Reporte" android:textColor="@color/verde_oscuro"
+            android:textSize="14sp" android:textStyle="bold" android:layout_marginBottom="8dp"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:weightSum="2" android:layout_marginBottom="8dp">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportarPdf"
+                style="@style/Widget.Avicola.Button.Primary"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginEnd="8dp"
+                android:text="📄 Exportar PDF" android:textAllCaps="false" android:textSize="12sp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportarExcel"
+                style="@style/Widget.Avicola.Button.Primary"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="8dp"
+                android:text="📊 Exportar Excel" android:textAllCaps="false" android:textSize="12sp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
