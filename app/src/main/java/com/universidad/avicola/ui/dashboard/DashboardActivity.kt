@@ -2,28 +2,22 @@ package com.universidad.avicola.ui.dashboard
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.universidad.avicola.R
 import com.universidad.avicola.databinding.ActivityDashboardBinding
 import com.universidad.avicola.ui.auth.LoginActivity
-import com.universidad.avicola.ui.aves.GestionAvesActivity
-import com.universidad.avicola.ui.finanzas.FinanzasActivity
-import com.universidad.avicola.ui.inventario.InventarioActivity
+import com.universidad.avicola.ui.dashboard.fragments.*
 
-/**
- * DashboardActivity.kt
- * ─────────────────────────────────────────────
- * Pantalla de bienvenida con grid de módulos.
- * Incluye validación de estado de cuenta (reload y email verificado).
- */
 class DashboardActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityDashboardBinding
+    lateinit var binding: ActivityDashboardBinding
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +27,6 @@ class DashboardActivity : AppCompatActivity() {
 
         auth = Firebase.auth
 
-        // Verificar sesión activa
         if (auth.currentUser == null) {
             irAlLogin()
             return
@@ -43,79 +36,25 @@ class DashboardActivity : AppCompatActivity() {
         user.reload().addOnCompleteListener { reloadTask ->
             if (reloadTask.isSuccessful) {
                 if (user.isEmailVerified) {
-                    // Cuenta verificada, configurar UI
-                    configurarModulos()
-                    configurarCerrarSesion()
+                    configurarNavegacion()
+                    configurarToolbar()
                 } else {
-                    Toast.makeText(
-                        this,
-                        "Debes verificar tu correo electrónico para acceder al sistema.",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this, "Verifica tu correo electrónico.", Toast.LENGTH_LONG).show()
                     auth.signOut()
                     irAlLogin()
                 }
             } else {
-                Toast.makeText(
-                    this,
-                    "No se pudo verificar el estado de la cuenta. Intenta de nuevo.",
-                    Toast.LENGTH_SHORT
-                ).show()
                 auth.signOut()
                 irAlLogin()
             }
         }
     }
 
-    // ──────────────────────────────────────────
-    //  Configuración de módulos
-    // ──────────────────────────────────────────
-    private fun configurarModulos() {
-
-        // ✅ MÓDULO ACTIVO: Inventario
-        binding.cardInventario.setOnClickListener {
-            startActivity(Intent(this, InventarioActivity::class.java))
-        }
-
-        // ✅ MÓDULO ACTIVO: Gestión de Aves
-        binding.cardGestionAves.setOnClickListener {
-            startActivity(Intent(this, GestionAvesActivity::class.java))
-        }
-
-        // ✅ MÓDULO ACTIVO: Finanzas
-        binding.cardFinanzas.alpha = 1.0f
-        binding.cardFinanzas.setOnClickListener {
-            startActivity(Intent(this, FinanzasActivity::class.java))
-        }
-
-        // 🔒 Módulos próximamente disponibles
-        val modulosInactivos = listOf(
-            binding.cardAlimentacion,
-            binding.cardTemperatura,
-            binding.cardMedico,
-            binding.cardEnfermedades,
-            binding.cardCostos
-        )
-
-        modulosInactivos.forEach { card ->
-            card.setOnClickListener {
-                Toast.makeText(
-                    this,
-                    getString(R.string.modulo_no_disponible),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
-    // ──────────────────────────────────────────
-    //  Cerrar sesión con confirmación
-    // ──────────────────────────────────────────
-    private fun configurarCerrarSesion() {
-        binding.btnCerrarSesion.setOnClickListener {
+    private fun configurarToolbar() {
+        binding.btnToolbarLogout.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Cerrar sesión")
-                .setMessage("¿Estás seguro que deseas cerrar sesión?")
+                .setMessage("¿Estás seguro de que deseas salir?")
                 .setPositiveButton("Sí") { _, _ ->
                     auth.signOut()
                     irAlLogin()
@@ -125,9 +64,43 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    // ──────────────────────────────────────────
-    //  Navegar al Login
-    // ──────────────────────────────────────────
+    private fun configurarNavegacion() {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_operaciones -> {
+                    replaceFragment(OperacionesFragment(), "OPERACIONES")
+                    true
+                }
+                R.id.nav_estimacion -> {
+                    replaceFragment(EstimacionFragment(), "ESTIMACIÓN")
+                    true
+                }
+                R.id.nav_finanzas -> {
+                    replaceFragment(FinanzasFragment(), "FINANZAS")
+                    true
+                }
+                R.id.nav_salud -> {
+                    replaceFragment(SaludFragment(), "SALUD")
+                    true
+                }
+                R.id.nav_perfil -> {
+                    replaceFragment(PerfilFragment(), "PERFIL")
+                    true
+                }
+                else -> false
+            }
+        }
+        binding.bottomNavigation.selectedItemId = R.id.nav_finanzas
+    }
+
+    fun replaceFragment(fragment: Fragment, subTitle: String, showReportes: Boolean = false) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.nav_host_fragment, fragment)
+            .commit()
+        binding.tvToolbarSubTitle.text = subTitle
+        binding.btnToolbarReportes.visibility = if (showReportes) View.VISIBLE else View.GONE
+    }
+
     private fun irAlLogin() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -135,9 +108,6 @@ class DashboardActivity : AppCompatActivity() {
         finish()
     }
 
-    // Bloquear el botón atrás en el dashboard
     @Suppress("MissingSuperCall", "DEPRECATION")
-    override fun onBackPressed() {
-        // No hacer nada — el usuario debe usar "Cerrar sesión"
-    }
+    override fun onBackPressed() {}
 }

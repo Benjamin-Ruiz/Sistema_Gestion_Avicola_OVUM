@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/blanco_semi">
+
+    <ImageView
+        android:id="@+id/imgPlaceholder"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@drawable/ic_logo_avicola"
+        android:alpha="0.3"
+        android:contentDescription="Placeholder" />
+
+    <TextView
+        android:id="@+id/tvPlaceholderTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Módulo en desarrollo"
+        android:textColor="@color/verde_oscuro"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Estamos trabajando para traerte esta funcionalidad pronto."
+        android:textAlignment="center"
+        android:textColor="@color/gris_texto"
+        android:textSize="16sp" />
+
+</LinearLayout>

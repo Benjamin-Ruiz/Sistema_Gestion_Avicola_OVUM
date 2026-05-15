@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/blanco_semi"
+    android:overScrollMode="never"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Avatar de Usuario -->
+        <FrameLayout
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="2dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_persona"
+                app:strokeColor="@color/verde_suave"
+                app:strokeWidth="4dp"
+                app:shapeAppearanceOverlay="@style/Circle" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnEditarFoto"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="4dp"
+                app:fabCustomSize="40dp"
+                app:elevation="4dp"
+                app:srcCompat="@drawable/ic_editar_perfil"
+                app:backgroundTint="@color/verde_primario"
+                app:tint="@color/blanco"
+                android:contentDescription="Editar foto"
+                app:shapeAppearanceOverlay="@style/Circle" />
+        </FrameLayout>
+
+        <!-- Correo bajo el Avatar -->
+        <TextView
+            android:id="@+id/tvCorreoPerfilHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="24dp"
+            android:text="usuario@correo.com"
+            android:textColor="@color/verde_oscuro"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Tarjeta de Datos Personales -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Información Personal"
+                    android:textColor="@color/verde_oscuro"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:hint="Nombre Completo"
+                    app:startIconDrawable="@drawable/ic_persona"
+                    app:startIconTint="@color/verde_primario">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etNombreCompleto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:hint="Rol en el Sistema"
+                    app:startIconDrawable="@drawable/ic_candado"
+                    app:startIconTint="@color/verde_primario">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRolSistema"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:enabled="false" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:hint="Ubicación / Sector"
+                    app:startIconDrawable="@drawable/ic_buscar"
+                    app:startIconTint="@color/verde_primario">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etUbicacion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enfoque de Producción"
+                    app:startIconDrawable="@drawable/ic_gallina"
+                    app:startIconTint="@color/verde_primario">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEnfoqueProduccion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Botón de Acción -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnActualizarPerfil"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="ACTUALIZAR PERFIL"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/verde_primario"
+            android:textColor="@color/blanco"
+            android:layout_marginBottom="40dp" />
+
+    </LinearLayout>
+</ScrollView>

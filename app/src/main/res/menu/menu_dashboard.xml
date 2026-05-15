@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_operaciones"
+        android:icon="@drawable/ic_inventario"
+        android:title="Ops" />
+    <item
+        android:id="@+id/nav_estimacion"
+        android:icon="@drawable/ic_costos"
+        android:title="Estim" />
+    <item
+        android:id="@+id/nav_finanzas"
+        android:icon="@drawable/ic_finanzas"
+        android:title="Finanzas" />
+    <item
+        android:id="@+id/nav_salud"
+        android:icon="@drawable/ic_medico"
+        android:title="Salud" />
+    <item
+        android:id="@+id/nav_perfil"
+        android:icon="@drawable/ic_persona"
+        android:title="Perfil" />
+</menu>

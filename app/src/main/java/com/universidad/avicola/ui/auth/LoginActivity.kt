@@ -46,7 +46,6 @@ class LoginActivity : AppCompatActivity() {
     private fun configurarBotones() {
         // Botón Iniciar Sesión
         binding.btnIniciarSesion.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
             val correo = binding.etUsuario.text.toString().trim()
             val contrasena = binding.etContrasena.text.toString().trim()
 
