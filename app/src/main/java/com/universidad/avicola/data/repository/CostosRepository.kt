@@ -11,10 +11,6 @@ import java.util.UUID
 /**
  * CostosRepository.kt
  * Ubicación: app/src/main/java/com/universidad/avicola/data/repository/
- *
- * CORRECCIÓN aplicada:
- * - actualizarCostoReal usaba .map { } (Result<String>.map no existe en Kotlin stdlib
- *   para Result<T>) — reemplazado con fold() explícito que devuelve Result<Unit>.
  */
 class CostosRepository(context: Context) {
 
@@ -69,7 +65,7 @@ class CostosRepository(context: Context) {
     }
 
     // ══════════════════════════════════════════════════════════════════
-    //  Integración con INVENTARIO
+    //  INTEGRACIÓN CON INVENTARIO
     // ══════════════════════════════════════════════════════════════════
 
     fun obtenerProductosInventario(): Flow<List<ProductoInventario>> =
@@ -103,6 +99,60 @@ class CostosRepository(context: Context) {
         )
     }
 
+    /**
+     * Verifica si el inventario tiene suficiente stock para cubrir
+     * todos los insumos de la estimación ANTES de descontarlos.
+     *
+     * @return Lista de descripciones de los insumos con stock insuficiente.
+     *         Si está vacía, el inventario es suficiente para activar la producción.
+     */
+    suspend fun verificarStockParaProduccion(
+        estimacion: EstimacionCostos,
+        productosActuales: List<ProductoInventario>
+    ): List<String> {
+        val insuficientes = mutableListOf<String>()
+
+        // Verificar fases de alimentación
+        estimacion.fases.forEach { fase ->
+            if (fase.productoInventarioId.isEmpty()) return@forEach
+            val producto = productosActuales.firstOrNull { it.id == fase.productoInventarioId }
+                ?: return@forEach
+            val consumoNecesario = fase.consumoTotalKg(estimacion.cantidadAves)
+            if (producto.cantidad < consumoNecesario) {
+                val falta = consumoNecesario - producto.cantidad
+                insuficientes.add(
+                    "• ${fase.nombre} (${fase.productoNombre.ifEmpty { producto.nombre }}): " +
+                            "necesita ${String.format("%.1f", consumoNecesario)} ${producto.unitType}, " +
+                            "disponible ${String.format("%.1f", producto.cantidad)} ${producto.unitType} " +
+                            "(faltan ${String.format("%.1f", falta)} ${producto.unitType})"
+                )
+            }
+        }
+
+        // Verificar ítems sanitarios
+        estimacion.itemsSanitarios.forEach { item ->
+            if (item.productoInventarioId.isEmpty()) return@forEach
+            val producto = productosActuales.firstOrNull { it.id == item.productoInventarioId }
+                ?: return@forEach
+            if (producto.cantidad < item.dosisParaLote) {
+                val falta = item.dosisParaLote - producto.cantidad
+                insuficientes.add(
+                    "• ${item.nombre}: " +
+                            "necesita ${String.format("%.1f", item.dosisParaLote)} ${producto.unitType}, " +
+                            "disponible ${String.format("%.1f", producto.cantidad)} ${producto.unitType} " +
+                            "(faltan ${String.format("%.1f", falta)} ${producto.unitType})"
+                )
+            }
+        }
+
+        return insuficientes
+    }
+
+    /**
+     * Descuenta los insumos del inventario al activar la producción.
+     * Solo descuenta los que tengan stock suficiente; los insuficientes
+     * se omiten (deben haberse verificado antes con verificarStockParaProduccion).
+     */
     suspend fun descontarInventarioParaProduccion(
         estimacion: EstimacionCostos,
         productosActuales: List<ProductoInventario>
@@ -112,12 +162,13 @@ class CostosRepository(context: Context) {
                 if (fase.productoInventarioId.isEmpty()) return@forEach
                 val producto = productosActuales.firstOrNull { it.id == fase.productoInventarioId }
                     ?: return@forEach
-                val nuevoStock = producto.cantidad - fase.consumoTotalKg(estimacion.cantidadAves)
-                if (nuevoStock >= 0.0) {
+                val consumo    = fase.consumoTotalKg(estimacion.cantidadAves)
+                val nuevoStock = producto.cantidad - consumo
+                if (nuevoStock >= 0) {
                     inventarioRepo.actualizarProducto(
                         producto,
                         producto.copy(cantidad = nuevoStock),
-                        "Descuento por estimación: ${estimacion.loteNombre}"
+                        "Activación de producción: ${estimacion.loteNombre}"
                     )
                 }
             }
@@ -126,11 +177,11 @@ class CostosRepository(context: Context) {
                 val producto = productosActuales.firstOrNull { it.id == item.productoInventarioId }
                     ?: return@forEach
                 val nuevoStock = producto.cantidad - item.dosisParaLote
-                if (nuevoStock >= 0.0) {
+                if (nuevoStock >= 0) {
                     inventarioRepo.actualizarProducto(
                         producto,
                         producto.copy(cantidad = nuevoStock),
-                        "Sanitario por estimación: ${estimacion.loteNombre}"
+                        "Sanitario — Activación: ${estimacion.loteNombre}"
                     )
                 }
             }
@@ -141,7 +192,7 @@ class CostosRepository(context: Context) {
     }
 
     // ══════════════════════════════════════════════════════════════════
-    //  Integración con FINANZAS
+    //  INTEGRACIÓN CON FINANZAS
     // ══════════════════════════════════════════════════════════════════
 
     suspend fun enviarCostoAFinanzas(estimacion: EstimacionCostos): Result<String> {
@@ -149,13 +200,13 @@ class CostosRepository(context: Context) {
             tipo        = TipoTransaccion.GASTO.name,
             categoria   = CategoriaGasto.OTRO_GASTO.name,
             descripcion = "Estimación de costos: ${estimacion.loteNombre} " +
-                          "(${estimacion.cantidadAves} aves / ${estimacion.diasCrianza} días)",
+                    "(${estimacion.cantidadAves} aves / ${estimacion.diasCrianza} días)",
             monto       = estimacion.costoTotal,
             estado      = EstadoPago.PENDIENTE.name,
             fechaMs     = System.currentTimeMillis(),
             loteId      = estimacion.loteId,
             notas       = "ROI estimado: ${String.format("%.1f", estimacion.roi)}% | " +
-                          "Ganancia estimada: Q${String.format("%.2f", estimacion.gananciaNeta)}"
+                    "Ganancia estimada: Q${String.format("%.2f", estimacion.gananciaNeta)}"
         )
         return finanzasRepo.agregarTransaccion(transaccion)
     }
@@ -172,8 +223,6 @@ class CostosRepository(context: Context) {
             variacionPorcentaje = variacion,
             estado              = EstadoEstimacion.COMPLETADA.name
         )
-        // CORRECCIÓN: Result<T> de Kotlin stdlib no tiene .map{}.
-        // Usamos fold() para convertir Result<String> → Result<Unit>.
         return guardarEstimacion(actualizada).fold(
             onSuccess = { Result.success(Unit) },
             onFailure = { Result.failure(it) }
@@ -181,7 +230,7 @@ class CostosRepository(context: Context) {
     }
 
     // ══════════════════════════════════════════════════════════════════
-    //  Integración con AVES / LOTES
+    //  INTEGRACIÓN CON AVES / LOTES
     // ══════════════════════════════════════════════════════════════════
 
     fun obtenerLotesActivos(): Flow<List<Lote>> = avesRepo.getLotesActivos()

@@ -84,7 +84,11 @@ class SaludActivity : AppCompatActivity() {
             val tabs = listOf(binding.btnTabLotes, binding.btnTabRegistros,
                 binding.btnTabVacunas, binding.btnTabAlertas)
             tabs.forEachIndexed { i, btn ->
+                // CORRECCIÓN: backgroundTintList = null evita que MaterialButton
+                // sobreescriba el drawable con el tint del tema (verde oscuro),
+                // que ocultaba el texto en los tabs inactivos.
                 btn.setBackgroundResource(if (i == idx) R.drawable.bg_tab_activo else R.drawable.bg_tab_inactivo)
+                btn.backgroundTintList = null
                 btn.setTextColor(getColor(if (i == idx) R.color.blanco else R.color.verde_primario))
             }
             binding.sectionLotes.visibility    = if (idx == 0) View.VISIBLE else View.GONE

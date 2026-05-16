@@ -326,163 +326,158 @@
                     </LinearLayout>
 
                     <LinearLayout android:id="@+id/seccionResultados"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="vertical">
 
                         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="8dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Alimentación"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResAlimentacion"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
-                                    android:textSize="13sp" android:textStyle="bold"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="8dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Sanitario"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResSanitario"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
-                                    android:textSize="13sp" android:textStyle="bold"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="8dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Operativo"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResOperativo"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
-                                    android:textSize="13sp" android:textStyle="bold"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="8dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Pérdida mortalidad"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResMortalidad"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/rojo_salir"
-                                    android:textSize="13sp" android:textStyle="bold"/>
-                            </LinearLayout>
-
-                            <View android:layout_width="match_parent" android:layout_height="1dp"
-                                android:background="@color/verde_claro" android:layout_marginVertical="8dp"/>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="8dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="COSTO TOTAL"
-                                    android:textColor="@color/verde_oscuro" android:textSize="15sp"
-                                    android:textStyle="bold"/>
-                                <TextView android:id="@+id/tvResCostoTotal"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
-                                    android:textSize="15sp" android:textStyle="bold"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Costo por ave"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResCostoPorAve"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/gris_texto"
-                                    android:textSize="13sp"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Costo diario"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResCostoDiario"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/gris_texto"
-                                    android:textSize="13sp"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Costo semanal"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResCostoSemanal"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/gris_texto"
-                                    android:textSize="13sp"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Costo mensual"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResCostoMensual"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/gris_texto"
-                                    android:textSize="13sp"/>
-                            </LinearLayout>
-
-                            <View android:layout_width="match_parent" android:layout_height="1dp"
-                                android:background="@color/verde_claro" android:layout_marginVertical="8dp"/>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Ingreso estimado"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResIngreso"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textColor="@color/gris_texto"
-                                    android:textSize="13sp"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="GANANCIA NETA"
-                                    android:textColor="@color/verde_oscuro" android:textSize="15sp"
-                                    android:textStyle="bold"/>
-                                <TextView android:id="@+id/tvResGanancia"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="Q0.00" android:textSize="15sp" android:textStyle="bold"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="ROI"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResRoi"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="0.0%" android:textSize="13sp" android:textStyle="bold"/>
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                                    android:layout_weight="1" android:text="Punto de equilibrio"
-                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
-                                <TextView android:id="@+id/tvResPuntoEquilibrio"
-                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="0 aves" android:textColor="@color/gris_texto"
-                                    android:textSize="13sp"/>
-                            </LinearLayout>
-
+                            android:orientation="horizontal" android:layout_marginBottom="8dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Alimentación"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResAlimentacion"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                                android:textSize="13sp" android:textStyle="bold"/>
                         </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="8dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Sanitario"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResSanitario"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                                android:textSize="13sp" android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="8dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Operativo"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResOperativo"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                                android:textSize="13sp" android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="8dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Pérdida mortalidad"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResMortalidad"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/rojo_salir"
+                                android:textSize="13sp" android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <View android:layout_width="match_parent" android:layout_height="1dp"
+                            android:background="@color/verde_claro" android:layout_marginVertical="8dp"/>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="8dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="COSTO TOTAL"
+                                android:textColor="@color/verde_oscuro" android:textSize="15sp"
+                                android:textStyle="bold"/>
+                            <TextView android:id="@+id/tvResCostoTotal"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                                android:textSize="15sp" android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Costo por ave"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResCostoPorAve"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/gris_texto"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Costo diario"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResCostoDiario"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/gris_texto"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Costo semanal"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResCostoSemanal"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/gris_texto"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Costo mensual"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResCostoMensual"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/gris_texto"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <View android:layout_width="match_parent" android:layout_height="1dp"
+                            android:background="@color/verde_claro" android:layout_marginVertical="8dp"/>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Ingreso estimado"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResIngreso"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/gris_texto"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="GANANCIA NETA"
+                                android:textColor="@color/verde_oscuro" android:textSize="15sp"
+                                android:textStyle="bold"/>
+                            <TextView android:id="@+id/tvResGanancia"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textSize="15sp" android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="ROI"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResRoi"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="0.0%" android:textSize="13sp" android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                android:layout_weight="1" android:text="Punto de equilibrio"
+                                android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                            <TextView android:id="@+id/tvResPuntoEquilibrio"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="0 aves" android:textColor="@color/gris_texto"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -502,7 +497,9 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGuardarEstimacion"
                 style="@style/Widget.Avicola.Button.Primary"
-                android:layout_width="match_parent" android:layout_height="52dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="52dp"
                 android:text="Guardar Estimación"
                 app:icon="@drawable/ic_anadir" app:iconSize="18dp"/>
 

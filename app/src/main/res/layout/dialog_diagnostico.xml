@@ -37,7 +37,7 @@
             android:id="@+id/btnAnalizarSintomas"
             style="@style/Widget.Avicola.Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:text="Analizar síntomas"
             android:layout_marginBottom="14dp"/>
 

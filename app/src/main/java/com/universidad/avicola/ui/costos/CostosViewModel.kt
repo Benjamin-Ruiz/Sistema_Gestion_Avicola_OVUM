@@ -17,10 +17,9 @@ import kotlinx.coroutines.launch
  */
 class CostosViewModel(app: Application) : AndroidViewModel(app) {
 
-    // Application implementa Context — el constructor CostosRepository(context: Context) acepta esto.
     private val repo = CostosRepository(app)
 
-    // ── Listas observables ──────────────────────────────────────────
+    // ── Listas observables ───────────────────────────────────────────────────
     private val _estimaciones = MutableLiveData<List<EstimacionCostos>>(emptyList())
     val estimaciones: LiveData<List<EstimacionCostos>> = _estimaciones
 
@@ -30,18 +29,27 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
     private val _productos = MutableLiveData<List<ProductoInventario>>(emptyList())
     val productos: LiveData<List<ProductoInventario>> = _productos
 
-    // ── Resultado de cálculo en tiempo real ─────────────────────────
+    // ── Resultado de cálculo en tiempo real ─────────────────────────────────
     private val _resultado = MutableLiveData<ResultadoCalculo?>(null)
     val resultado: LiveData<ResultadoCalculo?> = _resultado
 
-    // ── Mensajes y estado ────────────────────────────────────────────
+    // ── Mensajes y estado ────────────────────────────────────────────────────
     private val _mensaje = MutableLiveData("")
     val mensaje: LiveData<String> = _mensaje
 
     private val _cargando = MutableLiveData(false)
     val cargando: LiveData<Boolean> = _cargando
 
-    // ── Filtros ──────────────────────────────────────────────────────
+    /**
+     * Resultado de la verificación de stock antes de activar producción.
+     * - null  → no se ha verificado todavía
+     * - Empty → stock suficiente para todo
+     * - Non-empty → lista de insumos con stock insuficiente
+     */
+    private val _stockInsuficiente = MutableLiveData<List<String>?>(null)
+    val stockInsuficiente: LiveData<List<String>?> = _stockInsuficiente
+
+    // ── Filtros ───────────────────────────────────────────────────────────────
     private val _estimacionesFiltradas = MutableLiveData<List<EstimacionCostos>>(emptyList())
     val estimacionesFiltradas: LiveData<List<EstimacionCostos>> = _estimacionesFiltradas
 
@@ -119,7 +127,6 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
             val itemsEnriquecidos = repo.enriquecerItemsSanitariosConInventario(
                 estimacion.itemsSanitarios, productos
             )
-
             val resultado = CostosCalculator.calcular(
                 cantidadAves         = estimacion.cantidadAves,
                 diasCrianza          = estimacion.diasCrianza,
@@ -129,7 +136,6 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
                 porcentajeMortalidad = estimacion.porcentajeMortalidad,
                 precioVentaUnitario  = estimacion.precioVentaUnitario
             )
-
             val estimacionFinal = estimacion.copy(
                 fases                   = fasesEnriquecidas,
                 itemsSanitarios         = itemsEnriquecidos,
@@ -145,11 +151,9 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
                 puntoEquilibrioUnidades = resultado.puntoEquilibrioUnidades,
                 alertas                 = resultado.alertas
             )
-
             repo.guardarEstimacion(estimacionFinal)
                 .onSuccess { _mensaje.value = "Estimación guardada correctamente" }
                 .onFailure { _mensaje.value = "Error al guardar: ${it.message}" }
-
             _cargando.value = false
         }
     }
@@ -191,18 +195,63 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     // ══════════════════════════════════════════════════════════════════
-    //  INTEGRACIÓN INVENTARIO
+    //  ACTIVAR PRODUCCIÓN — con verificación de stock previa
     // ══════════════════════════════════════════════════════════════════
 
-    fun activarProduccion(estimacion: EstimacionCostos) {
+    /**
+     * Paso 1: Verificar stock ANTES de mostrar el diálogo de confirmación.
+     * El resultado se publica en [stockInsuficiente]:
+     *   - Lista vacía  → todo el inventario es suficiente
+     *   - Lista con items → hay insumos insuficientes; la Activity los muestra al usuario
+     */
+    fun verificarStockParaActivar(estimacion: EstimacionCostos) {
         viewModelScope.launch {
+            _cargando.value = true
             val productos = _productos.value ?: emptyList()
+            val insuficientes = repo.verificarStockParaProduccion(estimacion, productos)
+            _stockInsuficiente.value = insuficientes
+            _cargando.value = false
+        }
+    }
+
+    /** Limpia el resultado de la verificación después de que la Activity lo procesó. */
+    fun limpiarVerificacionStock() {
+        _stockInsuficiente.value = null
+    }
+
+    /**
+     * Paso 2: Activar producción.
+     * Llamar solo después de que el usuario confirmó (con o sin advertencia de stock).
+     *
+     * @param forzar Si true, activa aunque haya insumos insuficientes
+     *               (descuenta solo los que alcancen y omite los demás).
+     */
+    fun activarProduccion(estimacion: EstimacionCostos, forzar: Boolean = false) {
+        viewModelScope.launch {
+            _cargando.value = true
+            val productos = _productos.value ?: emptyList()
+
+            // Si no se fuerza, verificar una última vez
+            if (!forzar) {
+                val insuficientes = repo.verificarStockParaProduccion(estimacion, productos)
+                if (insuficientes.isNotEmpty()) {
+                    // La Activity debe haber manejado esto antes de llegar aquí,
+                    // pero lo capturamos por seguridad
+                    _stockInsuficiente.value = insuficientes
+                    _cargando.value = false
+                    return@launch
+                }
+            }
+
             repo.descontarInventarioParaProduccion(estimacion, productos)
                 .onSuccess {
                     guardarEstimacion(estimacion.copy(estado = EstadoEstimacion.ACTIVA.name))
-                    _mensaje.value = "Producción activada. Inventario actualizado."
+                    _mensaje.value = "✔ Producción activada. Inventario actualizado."
                 }
-                .onFailure { _mensaje.value = "Error al activar producción: ${it.message}" }
+                .onFailure {
+                    _mensaje.value = "Error al activar producción: ${it.message}"
+                }
+            _cargando.value = false
         }
     }
 

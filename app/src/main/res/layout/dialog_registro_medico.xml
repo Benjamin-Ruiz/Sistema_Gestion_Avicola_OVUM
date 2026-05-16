@@ -141,7 +141,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuardarRegistro"
             style="@style/Widget.Avicola.Button.Primary"
-            android:layout_width="match_parent" android:layout_height="50dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="Guardar registro" android:layout_marginBottom="8dp"/>
 
         <Button android:id="@+id/btnCerrarRegistro"

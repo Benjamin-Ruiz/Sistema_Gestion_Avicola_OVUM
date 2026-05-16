@@ -53,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:paddingBottom="80dp"
+        android:paddingBottom="160dp"
         android:clipToPadding="false">
 
         <LinearLayout
@@ -136,37 +136,90 @@
             </androidx.cardview.widget.CardView>
 
             <!-- ── FILTROS ── -->
+            <!--
+                CORRECCIÓN 1: Los botones usan android:backgroundTint="@null" para que
+                Material Design no sobreescriba el drawable con el color del tema.
+                Sin @null, MaterialButton aplica backgroundTint del tema (verde oscuro)
+                sobre el drawable, ocultando el texto en los botones inactivos.
+
+                También se cambia de <Button> a <com.google.android.material.button.MaterialButton>
+                con backgroundTint="@null" para control total del fondo.
+            -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="38dp"
+                android:layout_height="44dp"
                 android:orientation="horizontal"
                 android:layout_marginBottom="12dp"
                 android:background="@drawable/bg_spinner"
-                android:padding="3dp">
+                android:padding="4dp">
 
-                <Button android:id="@+id/btnFiltroTodas"
-                    android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
-                    android:text="Todas" android:textAllCaps="false" android:textSize="11sp"
-                    android:textColor="@color/blanco" android:background="@drawable/bg_tab_activo"
-                    android:paddingTop="0dp" android:paddingBottom="0dp" android:gravity="center"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFiltroTodas"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Todas"
+                    android:textAllCaps="false"
+                    android:textSize="11sp"
+                    android:textColor="@color/blanco"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_tab_activo"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:gravity="center"
+                    app:cornerRadius="8dp"
+                    app:strokeWidth="0dp"/>
 
-                <Button android:id="@+id/btnFiltroBorrador"
-                    android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
-                    android:text="Borrador" android:textAllCaps="false" android:textSize="11sp"
-                    android:textColor="@color/verde_primario" android:background="@drawable/bg_tab_inactivo"
-                    android:paddingTop="0dp" android:paddingBottom="0dp" android:gravity="center"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFiltroBorrador"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Borrador"
+                    android:textAllCaps="false"
+                    android:textSize="11sp"
+                    android:textColor="@color/verde_primario"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_tab_inactivo"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:gravity="center"
+                    app:cornerRadius="8dp"
+                    app:strokeWidth="0dp"/>
 
-                <Button android:id="@+id/btnFiltroActiva"
-                    android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
-                    android:text="Activa" android:textAllCaps="false" android:textSize="11sp"
-                    android:textColor="@color/verde_primario" android:background="@drawable/bg_tab_inactivo"
-                    android:paddingTop="0dp" android:paddingBottom="0dp" android:gravity="center"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFiltroActiva"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Activa"
+                    android:textAllCaps="false"
+                    android:textSize="11sp"
+                    android:textColor="@color/verde_primario"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_tab_inactivo"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:gravity="center"
+                    app:cornerRadius="8dp"
+                    app:strokeWidth="0dp"/>
 
-                <Button android:id="@+id/btnFiltroCompletada"
-                    android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
-                    android:text="Completada" android:textAllCaps="false" android:textSize="10sp"
-                    android:textColor="@color/verde_primario" android:background="@drawable/bg_tab_inactivo"
-                    android:paddingTop="0dp" android:paddingBottom="0dp" android:gravity="center"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFiltroCompletada"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Completada"
+                    android:textAllCaps="false"
+                    android:textSize="10sp"
+                    android:textColor="@color/verde_primario"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_tab_inactivo"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:gravity="center"
+                    app:cornerRadius="8dp"
+                    app:strokeWidth="0dp"/>
 
             </LinearLayout>
 
@@ -202,14 +255,23 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- FAB -->
+    <!--
+        CORRECCIÓN 2: El FAB estaba con layout_margin="16dp" y layout_marginBottom="80dp"
+        pero la barra inferior mide 60dp, así que el FAB quedaba encima del botón Salir.
+
+        Se sube el FAB a layout_marginBottom="80dp" (60dp barra + 20dp de separación)
+        y se posiciona con layout_gravity="bottom|end" con margen horizontal de 16dp.
+
+        El NestedScrollView también ajusta su paddingBottom a 160dp para que
+        el último elemento nunca quede tapado por el FAB ni la barra.
+    -->
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabNuevaEstimacion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="76dp"
         android:text="Nueva estimación"
         app:icon="@drawable/ic_anadir"
         app:backgroundTint="@color/verde_primario"
