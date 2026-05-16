@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/blanco_semi">
 
-    <!-- AppBar (Estilo Finanzas Unificado) -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,19 +26,36 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp">
 
-                <ImageView android:layout_width="36dp" android:layout_height="36dp"
-                    android:src="@drawable/ic_logo_avicola" android:contentDescription="Logo"
-                    android:scaleType="fitCenter"/>
+                <!-- Logo: usa ic_gallina que sí existe en el proyecto -->
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_gallina"
+                    android:contentDescription="Logo"
+                    android:scaleType="fitCenter"
+                    app:tint="@color/verde_primario"/>
 
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:layout_marginStart="8dp"
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="SISTEMA" android:textColor="@color/verde_oscuro"
-                        android:textSize="10sp" android:textStyle="bold"/>
-                    <TextView android:id="@+id/tvToolbarSubTitle" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="AVÍCOLA" android:textColor="@color/verde_oscuro"
-                        android:textSize="13sp" android:textStyle="bold"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SISTEMA"
+                        android:textColor="@color/verde_oscuro"
+                        android:textSize="10sp"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/tvToolbarSubTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="AVÍCOLA"
+                        android:textColor="@color/verde_oscuro"
+                        android:textSize="13sp"
+                        android:textStyle="bold"/>
                 </LinearLayout>
 
                 <ImageView
@@ -53,7 +69,7 @@
                     android:focusable="true"
                     android:visibility="gone"
                     android:contentDescription="Reportes"
-                    app:tint="@color/verde_primario" />
+                    app:tint="@color/verde_primario"/>
 
                 <ImageView
                     android:id="@+id/btnToolbarLogout"
@@ -66,11 +82,55 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:contentDescription="Cerrar sesión"
-                    app:tint="@color/rojo_salir" />
+                    app:tint="@color/rojo_salir"/>
 
             </LinearLayout>
-
         </androidx.appcompat.widget.Toolbar>
+
+        <!--
+            CORRECCIÓN: cardModuloCostos estaba DENTRO del Toolbar,
+            lo que hacía que se superpusiera y no fuera visible/clickeable.
+            Ahora va correctamente después del Toolbar, dentro del AppBarLayout.
+        -->
+        <LinearLayout
+            android:id="@+id/cardModuloCostos"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@color/verde_fondo"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_costos"
+                app:tint="@color/verde_primario"
+                android:contentDescription="Costos"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:text="Estimación de Costos"
+                android:textColor="@color/verde_oscuro"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_anadir"
+                app:tint="@color/verde_primario"
+                android:contentDescription="Ir a Costos"/>
+
+        </LinearLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Contenedor para los fragmentos -->
@@ -78,7 +138,7 @@
         android:id="@+id/nav_host_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
@@ -89,6 +149,6 @@
         app:menu="@menu/menu_dashboard"
         app:itemIconTint="@color/verde_primario"
         app:itemTextColor="@color/verde_primario"
-        app:labelVisibilityMode="labeled" />
+        app:labelVisibilityMode="labeled"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

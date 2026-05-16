@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- activity_costos_form.xml — res/layout/ -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/blanco_semi">
+
+    <!-- APP BAR -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/verde_oscuro"
+        app:elevation="4dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp">
+            <ImageView android:layout_width="28dp" android:layout_height="28dp"
+                android:src="@drawable/ic_costos" app:tint="@color/blanco"
+                android:contentDescription="Formulario"/>
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="10dp"
+                android:text="Nueva Estimación" android:textColor="@color/blanco"
+                android:textSize="18sp" android:textStyle="bold"/>
+            <Button android:id="@+id/btnCancelarForm"
+                android:layout_width="wrap_content" android:layout_height="36dp"
+                android:text="Cancelar" android:textAllCaps="false" android:textColor="@color/blanco"
+                android:background="@android:color/transparent" android:textSize="14sp"/>
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:paddingBottom="32dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- ══════════════ DATOS GENERALES ══════════════ -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp" app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/fondo_card"
+                android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Datos Generales" android:textColor="@color/verde_oscuro"
+                        android:textSize="14sp" android:textStyle="bold" android:layout_marginBottom="12dp"/>
+
+                    <!-- Nombre/Lote -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Avicola.TextInputLayout"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:hint="Nombre de la estimación" android:layout_marginBottom="10dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etNombreEstimacion"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:inputType="textCapSentences"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Lote vinculado -->
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Lote activo (opcional)" android:textColor="@color/gris_texto"
+                        android:textSize="12sp" android:layout_marginBottom="4dp"/>
+                    <Spinner android:id="@+id/spinnerLote"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:background="@drawable/bg_spinner"
+                        android:paddingHorizontal="12dp" android:layout_marginBottom="10dp"/>
+
+                    <!-- Tipo de ave -->
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Tipo de ave" android:textColor="@color/gris_texto"
+                        android:textSize="12sp" android:layout_marginBottom="4dp"/>
+                    <Spinner android:id="@+id/spinnerTipoAve"
+                        android:layout_width="match_parent" android:layout_height="48dp"
+                        android:background="@drawable/bg_spinner"
+                        android:paddingHorizontal="12dp" android:layout_marginBottom="10dp"/>
+
+                    <!-- Cantidad y días -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginBottom="10dp">
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Avicola.TextInputLayout"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:hint="Cant. aves" android:layout_marginEnd="6dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etCantidadAves"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:inputType="number"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Avicola.TextInputLayout"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:hint="Días de crianza">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etDiasCrianza"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:inputType="number"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <!-- Precio venta y costo ave -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginBottom="10dp">
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Avicola.TextInputLayout"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:hint="Precio venta/ave (Q)"
+                            android:layout_marginEnd="6dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etPrecioVenta"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Avicola.TextInputLayout"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:hint="Costo inicial/ave (Q)">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etCostoAveInicial"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <!-- Peso objetivo y mortalidad -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Avicola.TextInputLayout"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:hint="Peso objetivo (kg)"
+                            android:layout_marginEnd="6dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etPesoObjetivo"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Avicola.TextInputLayout"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:hint="Mortalidad (%)">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etMortalidad"
+                                android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:inputType="numberDecimal" android:text="5.0"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ══════════════ ALIMENTACIÓN ══════════════ -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp" app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/fondo_card" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <LinearLayout android:id="@+id/headerAlimentacion"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_alimento" app:tint="@color/verde_primario"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:layout_marginStart="8dp"
+                            android:text="Alimentación por Fases" android:textColor="@color/verde_oscuro"
+                            android:textSize="14sp" android:textStyle="bold"/>
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                            android:src="@drawable/ic_configuracion" app:tint="@color/gris_hint"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/seccionAlimentacion"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerFases"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"/>
+
+                        <Button android:id="@+id/btnAgregarFase"
+                            android:layout_width="match_parent" android:layout_height="40dp"
+                            android:text="+ Agregar fase" android:textAllCaps="false"
+                            android:textColor="@color/verde_primario" android:textSize="13sp"
+                            android:background="@drawable/bg_tab_inactivo" android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ══════════════ SANITARIO ══════════════ -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp" app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/fondo_card" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <LinearLayout android:id="@+id/headerSanitario"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_medico" app:tint="@color/verde_primario"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:layout_marginStart="8dp"
+                            android:text="Costos Sanitarios" android:textColor="@color/verde_oscuro"
+                            android:textSize="14sp" android:textStyle="bold"/>
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                            android:src="@drawable/ic_configuracion" app:tint="@color/gris_hint"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/seccionSanitario"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerSanitarios"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"/>
+                        <Button android:id="@+id/btnAgregarSanitario"
+                            android:layout_width="match_parent" android:layout_height="40dp"
+                            android:text="+ Agregar ítem sanitario" android:textAllCaps="false"
+                            android:textColor="@color/verde_primario" android:textSize="13sp"
+                            android:background="@drawable/bg_tab_inactivo" android:layout_marginTop="8dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ══════════════ OPERATIVOS ══════════════ -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp" app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/fondo_card" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <LinearLayout android:id="@+id/headerOperativo"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_configuracion" app:tint="@color/verde_primario"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:layout_marginStart="8dp"
+                            android:text="Costos Operativos" android:textColor="@color/verde_oscuro"
+                            android:textSize="14sp" android:textStyle="bold"/>
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp"
+                            android:src="@drawable/ic_configuracion" app:tint="@color/gris_hint"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/seccionOperativo"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerOperativos"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ══════════════ ALERTA STOCK ══════════════ -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardStockAlerta"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp" app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFEBEE" android:layout_marginBottom="12dp"
+                android:visibility="gone">
+                <TextView android:id="@+id/tvStockAlerta"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:padding="12dp" android:textColor="#C62828"
+                    android:textSize="13sp" android:lineSpacingExtra="4dp"/>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ══════════════ ALERTAS EN TIEMPO REAL ══════════════ -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardAlertasForm"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp" app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFF8E1" android:layout_marginBottom="12dp"
+                android:visibility="gone">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="12dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="⚠ Alertas" android:textColor="#F57F17"
+                        android:textSize="12sp" android:textStyle="bold" android:layout_marginBottom="4dp"/>
+                    <TextView android:id="@+id/tvAlertasForm"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textColor="#795548" android:textSize="12sp" android:lineSpacingExtra="4dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ══════════════ RESULTADOS EN TIEMPO REAL ══════════════ -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp" app:cardElevation="3dp"
+                app:cardBackgroundColor="@color/fondo_card" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+
+                    <LinearLayout android:id="@+id/headerResultados"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+                            android:src="@drawable/ic_finanzas" app:tint="@color/verde_primario"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:layout_marginStart="8dp"
+                            android:text="Resultados (en tiempo real)" android:textColor="@color/verde_oscuro"
+                            android:textSize="14sp" android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:id="@+id/seccionResultados"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="8dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Alimentación"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResAlimentacion"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                                    android:textSize="13sp" android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="8dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Sanitario"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResSanitario"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                                    android:textSize="13sp" android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="8dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Operativo"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResOperativo"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                                    android:textSize="13sp" android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="8dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Pérdida mortalidad"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResMortalidad"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/rojo_salir"
+                                    android:textSize="13sp" android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp"
+                                android:background="@color/verde_claro" android:layout_marginVertical="8dp"/>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="8dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="COSTO TOTAL"
+                                    android:textColor="@color/verde_oscuro" android:textSize="15sp"
+                                    android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvResCostoTotal"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                                    android:textSize="15sp" android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Costo por ave"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResCostoPorAve"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/gris_texto"
+                                    android:textSize="13sp"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Costo diario"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResCostoDiario"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/gris_texto"
+                                    android:textSize="13sp"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Costo semanal"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResCostoSemanal"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/gris_texto"
+                                    android:textSize="13sp"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Costo mensual"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResCostoMensual"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/gris_texto"
+                                    android:textSize="13sp"/>
+                            </LinearLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp"
+                                android:background="@color/verde_claro" android:layout_marginVertical="8dp"/>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Ingreso estimado"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResIngreso"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textColor="@color/gris_texto"
+                                    android:textSize="13sp"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="GANANCIA NETA"
+                                    android:textColor="@color/verde_oscuro" android:textSize="15sp"
+                                    android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvResGanancia"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="Q0.00" android:textSize="15sp" android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="ROI"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResRoi"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="0.0%" android:textSize="13sp" android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+                                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                                    android:layout_weight="1" android:text="Punto de equilibrio"
+                                    android:textColor="@color/gris_texto" android:textSize="13sp"/>
+                                <TextView android:id="@+id/tvResPuntoEquilibrio"
+                                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                    android:text="0 aves" android:textColor="@color/gris_texto"
+                                    android:textSize="13sp"/>
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Notas -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Avicola.TextInputLayout"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Notas (opcional)" android:layout_marginBottom="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNotasEstimacion"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minLines="2" android:inputType="textMultiLine|textCapSentences"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Botón guardar -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardarEstimacion"
+                style="@style/Widget.Avicola.Button.Primary"
+                android:layout_width="match_parent" android:layout_height="52dp"
+                android:text="Guardar Estimación"
+                app:icon="@drawable/ic_anadir" app:iconSize="18dp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

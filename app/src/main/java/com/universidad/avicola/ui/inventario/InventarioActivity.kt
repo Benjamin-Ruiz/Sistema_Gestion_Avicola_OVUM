@@ -43,16 +43,16 @@ class InventarioActivity : AppCompatActivity() {
     }
 
     private fun configurarUI() {
-        // RecyclerView
+        // ── RecyclerView ────────────────────────────────────────────────
         adapter = InventarioAdapter(
-            onItemClick = { abrirDialogProducto(it) },
-            onLongClick = { confirmarEliminacionConPassword(it) },
+            onItemClick      = { abrirDialogProducto(it) },
+            onLongClick      = { confirmarEliminacionConPassword(it) },
             onHistorialClick = { abrirDialogHistorial(it) }
         )
         binding.recyclerInventario.layoutManager = LinearLayoutManager(this)
         binding.recyclerInventario.adapter = adapter
 
-        // Buscador
+        // ── Buscador ────────────────────────────────────────────────────
         binding.etBuscar.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 viewModel.setBusqueda(s.toString())
@@ -61,7 +61,7 @@ class InventarioActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Chips de Alerta
+        // ── Chips de alerta ─────────────────────────────────────────────
         binding.chipStockCritico.setOnCheckedChangeListener { _, isChecked ->
             viewModel.toggleStockCritico(isChecked)
         }
@@ -69,7 +69,7 @@ class InventarioActivity : AppCompatActivity() {
             viewModel.toggleProximosVencer(isChecked)
         }
 
-        // Chips de Categoría dinámicos
+        // ── Chips de categoría dinámicos ────────────────────────────────
         Categoria.entries.forEach { categoria ->
             val chip = Chip(this).apply {
                 text = categoria.displayName
@@ -82,65 +82,53 @@ class InventarioActivity : AppCompatActivity() {
             binding.chipGroupCategorias.addView(chip)
         }
 
-        // FAB
+        // ── FAB ─────────────────────────────────────────────────────────
         binding.fabAnadir.setOnClickListener { abrirDialogProducto(null) }
 
-        // Configurar Bottom Navigation
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_inicio -> {
-                    startActivity(Intent(this, DashboardActivity::class.java))
-                    finish()
-                    true
+        // ── Bottom Navigation ────────────────────────────────────────────
+        // BUG ORIGINAL: BottomNavigationView selecciona automáticamente el
+        // primer ítem del menú (nav_inicio) al inflarse, y setOnItemSelectedListener
+        // lo dispara de inmediato → startActivity(Dashboard) + finish() al entrar.
+        //
+        // CORRECCIÓN: registrar el listener ANTES de que el nav tenga cualquier
+        // ítem seleccionado, y nunca llamar a setSelectedItemId programáticamente.
+        // Usamos un flag para ignorar la selección automática inicial.
+        //
+        // La forma más robusta es usar setOnItemSelectedListener con un guard,
+        // pero en BottomNavigationView la selección automática ocurre durante
+        // el inflate del menú — antes de que podamos poner ningún listener.
+        // La solución definitiva es reemplazar el listener después del layout:
+        binding.bottomNavigation.post {
+            // post() garantiza que el inflate del menú ya terminó.
+            // En este punto el nav ya tiene nav_inicio seleccionado por defecto,
+            // pero el listener aún NO está asignado → no se disparó nada.
+            binding.bottomNavigation.setOnItemSelectedListener { item ->
+                when (item.itemId) {
+                    R.id.nav_inicio -> {
+                        startActivity(Intent(this, DashboardActivity::class.java))
+                        finish()
+                        true
+                    }
+                    R.id.nav_reportes -> {
+                        abrirDialogReportes()
+                        true
+                    }
+                    R.id.nav_salir -> {
+                        confirmarSalida()
+                        true
+                    }
+                    else -> false
                 }
-                R.id.nav_reportes -> {
-                    abrirDialogReportes()
-                    true
-                }
-
-                R.id.nav_salir -> {
-                    confirmarSalida()
-                    true
-                }
-                else -> false
             }
         }
 
-        // Botón Añadir Filtro Personalizado
-        binding.btnAnadirFiltro.setOnClickListener {
-            abrirDialogFiltros()
-        }
+        // ── Filtros avanzados ───────────────────────────────────────────
+        binding.btnAnadirFiltro.setOnClickListener { abrirDialogFiltros() }
     }
 
-    private fun abrirDialogFiltros() {
-        val sheet = BottomSheetDialog(this)
-        val b = DialogFiltrosBinding.inflate(layoutInflater)
-        sheet.setContentView(b.root)
-
-        b.btnCerrarFiltros.setOnClickListener { sheet.dismiss() }
-
-        b.btnLimpiarFiltros.setOnClickListener {
-            viewModel.limpiarFiltrosAvanzados()
-            sheet.dismiss()
-        }
-
-        b.btnAplicarFiltros.setOnClickListener {
-            val min = b.etPrecioMin.text.toString().toDoubleOrNull()
-            val max = b.etPrecioMax.text.toString().toDoubleOrNull()
-            
-            val orden = when (b.rgOrden.checkedRadioButtonId) {
-                R.id.rbPrecioMenor -> "PrecioMenor"
-                R.id.rbPrecioMayor -> "PrecioMayor"
-                R.id.rbCantidad -> "Cantidad"
-                else -> "Nombre"
-            }
-
-            viewModel.aplicarFiltrosAvanzados(min, max, orden)
-            sheet.dismiss()
-        }
-
-        sheet.show()
-    }
+    // ══════════════════════════════════════════════════════════════════
+    //  OBSERVADORES
+    // ══════════════════════════════════════════════════════════════════
 
     private fun observarViewModel() {
         viewModel.productosFiltrados.observe(this) { lista ->
@@ -149,140 +137,42 @@ class InventarioActivity : AppCompatActivity() {
         }
 
         viewModel.mensaje.observe(this) { msg ->
-            if (msg.isNotEmpty()) Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            if (!msg.isNullOrEmpty()) Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
     }
 
-    // --- DIALOGS (Mantenemos la lógica pero simplificada) ---
+    // ══════════════════════════════════════════════════════════════════
+    //  DIALOG FILTROS AVANZADOS
+    // ══════════════════════════════════════════════════════════════════
 
-    private fun abrirDialogProducto(producto: ProductoInventario?) {
+    private fun abrirDialogFiltros() {
         val sheet = BottomSheetDialog(this)
-        val b = DialogProductoBinding.inflate(layoutInflater)
+        val b = DialogFiltrosBinding.inflate(layoutInflater)
         sheet.setContentView(b.root)
 
-        b.btnCerrarDialog.setOnClickListener { sheet.dismiss() }
-        b.btnCancelarDialog.setOnClickListener { sheet.dismiss() }
-
-        // Configurar Spinners
-        val categorias = Categoria.entries.map { it.displayName }
-        val adapterCat = ArrayAdapter(this, android.R.layout.simple_spinner_item, categorias)
-        adapterCat.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        b.spinnerCategoria.adapter = adapterCat
-
-        val unidades = listOf("Unidades", "Sacos", "Libras", "Kilogramos", "Litros", "Mililitros", "Cajas")
-        val adapterUni = ArrayAdapter(this, android.R.layout.simple_spinner_item, unidades)
-        adapterUni.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        b.spinnerUnidad.adapter = adapterUni
-
-        // Manejo de Fecha
-        var fechaVencimientoMs = producto?.fechaVencimientoMs ?: 0L
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-
-        if (fechaVencimientoMs > 0) {
-            b.etFecha.setText(sdf.format(Date(fechaVencimientoMs)))
+        b.btnCerrarFiltros.setOnClickListener { sheet.dismiss() }
+        b.btnLimpiarFiltros.setOnClickListener {
+            viewModel.limpiarFiltrosAvanzados()
+            sheet.dismiss()
         }
-
-        val datePickerListener = View.OnClickListener {
-            val calendar = Calendar.getInstance()
-            if (fechaVencimientoMs > 0) calendar.timeInMillis = fechaVencimientoMs
-            
-            val picker = android.app.DatePickerDialog(
-                this,
-                { _, year, month, dayOfMonth ->
-                    val selected = Calendar.getInstance()
-                    selected.set(year, month, dayOfMonth)
-                    fechaVencimientoMs = selected.timeInMillis
-                    b.etFecha.setText(sdf.format(selected.time))
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            )
-            picker.show()
-        }
-        b.etFecha.setOnClickListener(datePickerListener)
-        b.tilFecha.setEndIconOnClickListener(datePickerListener)
-
-        // Lógica especial por Categoría
-        b.spinnerCategoria.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val catSeleccionada = Categoria.entries[position]
-                
-                when (catSeleccionada) {
-                    Categoria.HERRAMIENTAS -> {
-                        // Ocultar fecha de vencimiento para herramientas
-                        b.tvFechaLabel.visibility = View.GONE
-                        b.tilFecha.visibility = View.GONE
-                        fechaVencimientoMs = 0L // Resetear fecha
-                        
-                        b.tvPrecioLabel.text = "Precio de Compra"
-                        b.tilPrecio.hint = "Precio de Compra"
-                    }
-                    Categoria.MEDICINAS -> {
-                        // Mostrar fecha de vencimiento obligatoriamente para medicinas
-                        b.tvFechaLabel.visibility = View.VISIBLE
-                        b.tilFecha.visibility = View.VISIBLE
-                        
-                        b.tvPrecioLabel.text = "Precio Unitario"
-                        b.tilPrecio.hint = "Precio Unitario"
-                    }
-                    else -> {
-                        // Comportamiento normal para Alimentos u Otros
-                        b.tvFechaLabel.visibility = View.VISIBLE
-                        b.tilFecha.visibility = View.VISIBLE
-                        
-                        b.tvPrecioLabel.text = "Precio Unitario"
-                        b.tilPrecio.hint = "Precio Unitario"
-                    }
-                }
+        b.btnAplicarFiltros.setOnClickListener {
+            val min = b.etPrecioMin.text.toString().toDoubleOrNull()
+            val max = b.etPrecioMax.text.toString().toDoubleOrNull()
+            val orden = when (b.rgOrden.checkedRadioButtonId) {
+                R.id.rbPrecioMenor -> "PrecioMenor"
+                R.id.rbPrecioMayor -> "PrecioMayor"
+                R.id.rbCantidad    -> "Cantidad"
+                else               -> "Nombre"
             }
-            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
-        }
-
-        // Pre-rellenar si es edición
-        producto?.let { p ->
-            b.etNombreProducto.setText(p.nombre)
-            b.etCantidad.setText(p.cantidad.toString())
-            b.etPrecio.setText(p.precioUnitario.toString())
-            b.etMinStock.setText(p.minStock.toString())
-            b.etNumeroLote.setText(p.numeroLote)
-            
-            val catIndex = Categoria.entries.indexOfFirst { it.name == p.categoria }
-            if (catIndex >= 0) b.spinnerCategoria.setSelection(catIndex)
-            
-            val uniIndex = unidades.indexOf(p.unitType)
-            if (uniIndex >= 0) b.spinnerUnidad.setSelection(uniIndex)
-
-            b.tvRazonLabel.visibility = View.VISIBLE
-            b.tilRazon.visibility = View.VISIBLE
-        }
-
-        b.btnGuardarProducto.setOnClickListener {
-            val nombre = b.etNombreProducto.text.toString()
-            if (nombre.isEmpty()) {
-                b.tilNombreProducto.error = "Campo obligatorio"
-                return@setOnClickListener
-            }
-
-            val nuevo = (producto ?: ProductoInventario()).copy(
-                nombre = nombre,
-                cantidad = b.etCantidad.text.toString().toDoubleOrNull() ?: 0.0,
-                precioUnitario = b.etPrecio.text.toString().toDoubleOrNull() ?: 0.0,
-                minStock = b.etMinStock.text.toString().toDoubleOrNull() ?: 0.0,
-                categoria = Categoria.entries[b.spinnerCategoria.selectedItemPosition].name,
-                unitType = b.spinnerUnidad.selectedItem.toString(),
-                numeroLote = b.etNumeroLote.text.toString(),
-                fechaVencimientoMs = fechaVencimientoMs,
-                fechaActualizacion = System.currentTimeMillis()
-            )
-
-            if (producto == null) viewModel.agregarProducto(nuevo)
-            else viewModel.actualizarProducto(producto, nuevo, b.etRazonCambio.text.toString())
-            
+            viewModel.aplicarFiltrosAvanzados(min, max, orden)
             sheet.dismiss()
         }
         sheet.show()
     }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  DIALOG REPORTES
+    // ══════════════════════════════════════════════════════════════════
 
     private fun abrirDialogReportes() {
         val sheet = BottomSheetDialog(this)
@@ -292,48 +182,135 @@ class InventarioActivity : AppCompatActivity() {
         b.btnCerrarReportes.setOnClickListener { sheet.dismiss() }
 
         viewModel.reporte.observe(this) { r ->
-            // Animaciones de números
             b.tvTotalProductos.animateNumber(r.totalProductos)
             b.tvValorTotal.animateNumber(r.valorTotal, isCurrency = true)
             b.tvStockCritico.animateNumber(r.stockCritico)
             b.tvProximosVencer.animateNumber(r.porVencer)
 
-            // Desglose de categorías
             val sb = StringBuilder()
             r.desgloseCategorias.forEach { (catName, cant) ->
-                val displayName = try { Categoria.valueOf(catName).displayName } catch (e: Exception) { catName }
-                sb.append("• $displayName: $cant productos\n")
+                val display = try { Categoria.valueOf(catName).displayName } catch (e: Exception) { catName }
+                sb.append("• $display: $cant productos\n")
             }
             b.tvDesgloseCategorias.text = if (sb.isEmpty()) "Sin datos" else sb.toString()
 
-            // Alertas críticas
-            if (r.stockCritico > 0) {
-                b.cardCriticos.visibility = View.VISIBLE
-                b.tvListaCriticos.text = r.listaCriticos.joinToString("\n")
-            } else {
-                b.cardCriticos.visibility = View.GONE
-            }
+            b.cardCriticos.visibility = if (r.stockCritico > 0) View.VISIBLE else View.GONE
+            b.tvListaCriticos.text = r.listaCriticos.joinToString("\n")
 
-            // Alertas vencimiento
-            if (r.porVencer > 0) {
-                b.cardVencimientos.visibility = View.VISIBLE
-                b.tvListaVencimientos.text = r.listaPorVencer.joinToString("\n")
-            } else {
-                b.cardVencimientos.visibility = View.GONE
-            }
+            b.cardVencimientos.visibility = if (r.porVencer > 0) View.VISIBLE else View.GONE
+            b.tvListaVencimientos.text = r.listaPorVencer.joinToString("\n")
 
-            if (r.vencidos > 0) {
-                b.tvVencidos.visibility = View.VISIBLE
-                b.tvVencidos.text = "⚠️ Hay ${r.vencidos} productos vencidos"
-            } else {
-                b.tvVencidos.visibility = View.GONE
-            }
+            b.tvVencidos.visibility = if (r.vencidos > 0) View.VISIBLE else View.GONE
+            b.tvVencidos.text = "⚠ Hay ${r.vencidos} productos vencidos"
         }
-
         sheet.show()
     }
 
+    // ══════════════════════════════════════════════════════════════════
+    //  DIALOG PRODUCTO (CREAR / EDITAR)
+    // ══════════════════════════════════════════════════════════════════
 
+    private fun abrirDialogProducto(producto: ProductoInventario?) {
+        val sheet = BottomSheetDialog(this)
+        val b = DialogProductoBinding.inflate(layoutInflater)
+        sheet.setContentView(b.root)
+
+        b.btnCerrarDialog.setOnClickListener { sheet.dismiss() }
+        b.btnCancelarDialog.setOnClickListener { sheet.dismiss() }
+
+        // Spinner categoría
+        val categorias = Categoria.entries.map { it.displayName }
+        val adapterCat = ArrayAdapter(this, android.R.layout.simple_spinner_item, categorias)
+        adapterCat.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        b.spinnerCategoria.adapter = adapterCat
+
+        // Spinner unidad
+        val unidades = listOf("Unidades", "Sacos", "Libras", "Kilogramos", "Litros", "Mililitros", "Cajas")
+        val adapterUni = ArrayAdapter(this, android.R.layout.simple_spinner_item, unidades)
+        adapterUni.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        b.spinnerUnidad.adapter = adapterUni
+
+        // Fecha de vencimiento
+        var fechaVencimientoMs = producto?.fechaVencimientoMs ?: 0L
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        if (fechaVencimientoMs > 0) b.etFecha.setText(sdf.format(Date(fechaVencimientoMs)))
+
+        val datePickerListener = View.OnClickListener {
+            val calendar = Calendar.getInstance()
+            if (fechaVencimientoMs > 0) calendar.timeInMillis = fechaVencimientoMs
+            android.app.DatePickerDialog(this, { _, year, month, day ->
+                val selected = Calendar.getInstance().also { it.set(year, month, day) }
+                fechaVencimientoMs = selected.timeInMillis
+                b.etFecha.setText(sdf.format(selected.time))
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+        b.etFecha.setOnClickListener(datePickerListener)
+        b.tilFecha.setEndIconOnClickListener(datePickerListener)
+
+        // Lógica por categoría
+        b.spinnerCategoria.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: android.widget.AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                when (Categoria.entries[pos]) {
+                    Categoria.HERRAMIENTAS -> {
+                        b.tvFechaLabel.visibility = View.GONE
+                        b.tilFecha.visibility = View.GONE
+                        fechaVencimientoMs = 0L
+                        b.tvPrecioLabel.text = "Precio de Compra"
+                        b.tilPrecio.hint = "Precio de Compra"
+                    }
+                    else -> {
+                        b.tvFechaLabel.visibility = View.VISIBLE
+                        b.tilFecha.visibility = View.VISIBLE
+                        b.tvPrecioLabel.text = "Precio Unitario"
+                        b.tilPrecio.hint = "Precio Unitario"
+                    }
+                }
+            }
+            override fun onNothingSelected(p: android.widget.AdapterView<*>?) {}
+        }
+
+        // Pre-rellenar si es edición
+        producto?.let { p ->
+            b.etNombreProducto.setText(p.nombre)
+            b.etCantidad.setText(p.cantidad.toString())
+            b.etPrecio.setText(p.precioUnitario.toString())
+            b.etMinStock.setText(p.minStock.toString())
+            b.etNumeroLote.setText(p.numeroLote)
+            val catIndex = Categoria.entries.indexOfFirst { it.name == p.categoria }
+            if (catIndex >= 0) b.spinnerCategoria.setSelection(catIndex)
+            val uniIndex = unidades.indexOf(p.unitType)
+            if (uniIndex >= 0) b.spinnerUnidad.setSelection(uniIndex)
+            b.tvRazonLabel.visibility = View.VISIBLE
+            b.tilRazon.visibility = View.VISIBLE
+        }
+
+        b.btnGuardarProducto.setOnClickListener {
+            val nombre = b.etNombreProducto.text.toString().trim()
+            if (nombre.isEmpty()) {
+                b.tilNombreProducto.error = "Campo obligatorio"
+                return@setOnClickListener
+            }
+            val nuevo = (producto ?: ProductoInventario()).copy(
+                nombre             = nombre,
+                cantidad           = b.etCantidad.text.toString().toDoubleOrNull() ?: 0.0,
+                precioUnitario     = b.etPrecio.text.toString().toDoubleOrNull() ?: 0.0,
+                minStock           = b.etMinStock.text.toString().toDoubleOrNull() ?: 0.0,
+                categoria          = Categoria.entries[b.spinnerCategoria.selectedItemPosition].name,
+                unitType           = b.spinnerUnidad.selectedItem.toString(),
+                numeroLote         = b.etNumeroLote.text.toString(),
+                fechaVencimientoMs = fechaVencimientoMs,
+                fechaActualizacion = System.currentTimeMillis()
+            )
+            if (producto == null) viewModel.agregarProducto(nuevo)
+            else viewModel.actualizarProducto(producto, nuevo, b.etRazonCambio.text.toString())
+            sheet.dismiss()
+        }
+        sheet.show()
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  ELIMINACIÓN CON CONTRASEÑA
+    // ══════════════════════════════════════════════════════════════════
 
     private fun confirmarEliminacionConPassword(producto: ProductoInventario) {
         val user = FirebaseAuth.getInstance().currentUser
@@ -341,11 +318,9 @@ class InventarioActivity : AppCompatActivity() {
             Toast.makeText(this, "Sesión no válida", Toast.LENGTH_SHORT).show()
             return
         }
-
-        // 1. Diálogo de confirmación inicial profesional
         AlertDialog.Builder(this)
             .setTitle("Confirmar Eliminación")
-            .setMessage("¿Desea eliminar permanentemente el producto '${producto.nombre}'? Esta acción no se puede deshacer.")
+            .setMessage("¿Desea eliminar permanentemente '${producto.nombre}'? Esta acción no se puede deshacer.")
             .setPositiveButton("Eliminar") { _, _ ->
                 abrirDialogVerificacionPassword(user.email!!, producto)
             }
@@ -362,7 +337,8 @@ class InventarioActivity : AppCompatActivity() {
             setBoxCornerRadii(12f, 12f, 12f, 12f)
         }
         val etPassword = TextInputEditText(this).apply {
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                    android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
             textSize = 14f
         }
         inputLayout.addView(etPassword)
@@ -375,13 +351,14 @@ class InventarioActivity : AppCompatActivity() {
                 val password = etPassword.text.toString()
                 if (password.isNotEmpty()) {
                     val credential = EmailAuthProvider.getCredential(email, password)
-                    FirebaseAuth.getInstance().currentUser?.reauthenticate(credential)
+                    FirebaseAuth.getInstance().currentUser
+                        ?.reauthenticate(credential)
                         ?.addOnSuccessListener {
                             viewModel.eliminarProducto(producto.id, producto.nombre)
-                            Toast.makeText(this, "✓ Producto eliminado con éxito", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "✔ Producto eliminado con éxito", Toast.LENGTH_SHORT).show()
                         }
                         ?.addOnFailureListener {
-                            Toast.makeText(this, "❌ Error: Credenciales incorrectas", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, "❌ Credenciales incorrectas", Toast.LENGTH_LONG).show()
                         }
                 }
             }
@@ -395,14 +372,21 @@ class InventarioActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    // ══════════════════════════════════════════════════════════════════
+    //  DIALOG HISTORIAL
+    // ══════════════════════════════════════════════════════════════════
+
     private fun abrirDialogHistorial(producto: ProductoInventario) {
         val sheet = BottomSheetDialog(this)
         val b = DialogHistorialBinding.inflate(layoutInflater)
         sheet.setContentView(b.root)
         b.btnCerrarHistorial.setOnClickListener { sheet.dismiss() }
-        // Lógica de historial...
         sheet.show()
     }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  SALIDA
+    // ══════════════════════════════════════════════════════════════════
 
     private fun confirmarSalida() {
         AlertDialog.Builder(this)

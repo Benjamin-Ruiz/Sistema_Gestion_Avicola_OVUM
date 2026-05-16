@@ -53,7 +53,68 @@
     <string name="confirmar_eliminar">¿Eliminar este producto?</string>
     <string name="error_campos_inventario">Completa nombre y cantidad</string>
 
+    <!-- ═══════════════════════════════════════════════
+     MÓDULO: ESTIMACIÓN DE COSTOS
+     ═══════════════════════════════════════════════ -->
+    <string name="nueva_estimacion">Nueva estimación</string>
+    <string name="sin_estimaciones">Aún no hay estimaciones.\nToca + para crear la primera.</string>
+    <string name="costo_total">Costo total</string>
+    <string name="ganancia_neta">Ganancia neta</string>
+    <string name="roi">ROI</string>
+    <string name="costo_por_ave">Costo por ave</string>
+    <string name="costo_diario">Costo diario</string>
+    <string name="costo_semanal">Costo semanal</string>
+    <string name="costo_mensual">Costo mensual</string>
+    <string name="ingreso_estimado">Ingreso estimado</string>
+    <string name="estimacion_guardada">Estimación guardada correctamente</string>
+    <string name="estimacion_eliminada">Estimación eliminada</string>
+    <string name="estimacion_duplicada">Estimación duplicada</string>
+    <string name="enviado_a_finanzas">Costo enviado al módulo de Finanzas</string>
+    <string name="produccion_activada">Producción activada. Inventario actualizado.</string>
+    <string name="stock_insuficiente"> Inventario insuficiente para esta producción</string>
+    <string name="costo_fase_preview">Costo estimado (×100 aves): Q%.2f</string>
+    <string name="registrar_costo_real">Registrar costo real</string>
+    <string name="comparacion_estimado_real">Estimado vs Real</string>
+    <string name="precision_estimacion">Precisión de la estimación</string>
+    <string name="alerta_mortalidad_alta">⚠ Mortalidad elevada. Revisa condiciones del galpón.</string>
+    <string name="alerta_ganancia_negativa">⚠ Ganancia negativa. Revisa precios de venta o reduce costos.</string>
+    <string name="alerta_costo_alto">⚠ Costo de alimentación muy alto</string>
+    <string name="alerta_roi_bajo">⚠ ROI bajo. Considera optimizar la producción.</string>
+    <string name="confirmar_eliminar_estimacion">¿Eliminar esta estimación? Esta acción no se puede deshacer.</string>
+    <string name="confirmar_activar_produccion">Esto descontará los insumos del inventario y marcará la estimación como Activa. ¿Continuar?</string>
+    <string name="activar_produccion">Activar producción</string>
+    <string name="sin_lote_asignado">Sin lote asignado</string>
+    <string name="fase_inicio">Inicio</string>
+    <string name="fase_crecimiento">Crecimiento</string>
+    <string name="fase_engorde">Engorde</string>
+    <string name="fase_produccion">Producción</string>
+    <string name="tipo_ave_engorde">Pollo de Engorde</string>
+    <string name="tipo_ave_ponedora">Gallina Ponedora</string>
+    <string name="tipo_ave_reproductora">Reproductora</string>
+    <string name="estado_borrador">Borrador</string>
+    <string name="estado_activa">Activa</string>
+    <string name="estado_completada">Completada</string>
+    <string name="estado_archivada">Archivada</string>
+
     <string name="reportes">Reporte financiero</string>
     <string name="punto_equilibrio">Punto de equilibrio</string>
     <string name="cuentas_pendientes">Cuentas pendientes</string>
+
+    <!-- MÓDULO: CONTROL SANITARIO -->
+    <string name="modulo_salud">Control Sanitario</string>
+    <string name="sin_lotes_salud">No hay lotes activos. Crea lotes en Gestión de Aves.</string>
+    <string name="sin_registros_medicos">Sin registros médicos.</string>
+    <string name="sin_vacunaciones">Sin vacunaciones registradas.</string>
+    <string name="sin_alertas_salud">Sin alertas activas.</string>
+    <string name="registro_guardado">Registro médico guardado</string>
+    <string name="vacunacion_guardada">Vacunación guardada</string>
+    <string name="vacuna_aplicada">Vacuna aplicada. Inventario e historial actualizados.</string>
+    <string name="caso_resuelto">Caso marcado como resuelto</string>
+    <string name="confirmar_eliminar_registro">¿Eliminar este registro médico?</string>
+    <string name="confirmar_eliminar_vacuna">¿Eliminar este registro de vacunación?</string>
+    <string name="seleccionar_lote">Seleccionar lote</string>
+    <string name="sin_medicamento">Sin medicamento</string>
+    <string name="diagnostico_asistido">Diagnóstico asistido por síntomas</string>
+    <string name="selecciona_sintoma">Selecciona al menos un síntoma</string>
+
 </resources>

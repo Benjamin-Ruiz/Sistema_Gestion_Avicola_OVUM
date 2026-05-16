@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardSaludLote"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@color/fondo_card">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="14dp">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+            <TextView android:id="@+id/tvSaludLoteNombre"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="Lote"
+                android:textColor="@color/verde_oscuro" android:textSize="15sp" android:textStyle="bold"
+                android:maxLines="1" android:ellipsize="end"/>
+            <TextView android:id="@+id/tvSaludLoteEstado"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Normal" android:textColor="@color/blanco" android:textSize="10sp"
+                android:paddingHorizontal="8dp" android:paddingVertical="3dp"
+                android:background="@drawable/bg_badge_verde"/>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginBottom="6dp">
+            <TextView android:id="@+id/tvSaludLoteAves"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="0 aves"
+                android:textColor="@color/gris_texto" android:textSize="12sp"/>
+            <TextView android:id="@+id/tvSaludLoteMortalidad"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 bajas" android:textColor="@color/rojo_salir" android:textSize="12sp"/>
+        </LinearLayout>
+
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="@color/verde_claro" android:layout_marginBottom="8dp"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Costo sanitario" android:textColor="@color/gris_hint" android:textSize="10sp"/>
+                <TextView android:id="@+id/tvSaludLoteCosto"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Q0.00" android:textColor="@color/verde_oscuro"
+                    android:textSize="13sp" android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                <TextView android:id="@+id/tvSaludLoteVacunas"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="0 vacunas pend." android:textColor="@color/dorado" android:textSize="11sp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical" android:gravity="end">
+                <TextView android:id="@+id/tvSaludLoteTratamientos"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="0 casos" android:textColor="@color/gris_hint" android:textSize="11sp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView android:id="@+id/tvSaludLoteAlertas"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="" android:textColor="#E65100" android:textSize="11sp"
+            android:layout_marginTop="6dp" android:visibility="gone"
+            android:maxLines="2" android:ellipsize="end"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

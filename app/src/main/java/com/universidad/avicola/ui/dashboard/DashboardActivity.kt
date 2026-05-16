@@ -13,12 +13,30 @@ import com.google.firebase.ktx.Firebase
 import com.universidad.avicola.R
 import com.universidad.avicola.databinding.ActivityDashboardBinding
 import com.universidad.avicola.ui.auth.LoginActivity
+import com.universidad.avicola.ui.costos.CostosActivity
 import com.universidad.avicola.ui.dashboard.fragments.*
 
 class DashboardActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityDashboardBinding
     private lateinit var auth: FirebaseAuth
+
+    /**
+     * FLAG: indica si el BottomNav ya fue inicializado por el usuario.
+     *
+     * CORRECCIÓN DEL BUG:
+     * El problema era que binding.bottomNavigation.selectedItemId = R.id.nav_finanzas
+     * al final de configurarNavegacion() dispara onItemSelected ANTES de que el usuario
+     * toque nada. Si el usuario luego navega a InventarioFragment (que vive también
+     * dentro del DashboardActivity), cualquier recreación del fragment o cambio de
+     * configuración volvía a ejecutar configurarNavegacion(), que fijaba nav_finanzas
+     * y reemplazaba InventarioFragment con FinanzasFragment.
+     *
+     * Solución: usamos un flag booleano para que la selección programática inicial
+     * (setSelectedItemId) no dispare replaceFragment. Solo las pulsaciones reales
+     * del usuario (posteriores al primer setup) ejecutan la navegación.
+     */
+    private var navInicializado = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,10 +80,18 @@ class DashboardActivity : AppCompatActivity() {
                 .setNegativeButton("Cancelar", null)
                 .show()
         }
+
+        binding.cardModuloCostos.setOnClickListener {
+            startActivity(Intent(this, CostosActivity::class.java))
+        }
     }
 
     private fun configurarNavegacion() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
+            // CORRECCIÓN: ignorar el primer disparo programático.
+            // Solo navegar cuando el usuario ya interactuó con el nav al menos una vez.
+            if (!navInicializado) return@setOnItemSelectedListener true
+
             when (item.itemId) {
                 R.id.nav_operaciones -> {
                     replaceFragment(OperacionesFragment(), "OPERACIONES")
@@ -90,7 +116,15 @@ class DashboardActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
+        // Esta línea dispara onItemSelected, pero navInicializado es false → se ignora.
         binding.bottomNavigation.selectedItemId = R.id.nav_finanzas
+
+        // A partir de aquí el flag es true: el listener procesará los toques reales.
+        navInicializado = true
+
+        // Cargar el fragment inicial manualmente (sin depender del listener).
+        replaceFragment(FinanzasFragment(), "FINANZAS")
     }
 
     fun replaceFragment(fragment: Fragment, subTitle: String, showReportes: Boolean = false) {

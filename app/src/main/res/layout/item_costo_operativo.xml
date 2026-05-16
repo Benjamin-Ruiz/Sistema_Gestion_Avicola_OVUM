@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- item_costo_operativo.xml — res/layout/ -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="6dp"
+    android:paddingHorizontal="2dp">
+
+    <!-- Nombre + Tipo -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginEnd="12dp">
+
+        <TextView
+            android:id="@+id/tvOpNombre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agua"
+            android:textColor="@color/gris_texto"
+            android:textSize="13sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tvOpTipo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fijo"
+            android:textColor="@color/gris_hint"
+            android:textSize="11sp"/>
+
+    </LinearLayout>
+
+    <!-- Monto -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Avicola.TextInputLayout"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:hint="Monto (Q)">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etOpMonto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:textSize="13sp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

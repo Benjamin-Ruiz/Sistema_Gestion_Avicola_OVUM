@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- item_estimacion.xml — res/layout/ -->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardEstimacion"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@color/fondo_card">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <!-- Fila 1: Lote + Estado -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:id="@+id/tvEstLote"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Lote"
+                android:textColor="@color/verde_oscuro"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/tvEstEstado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Borrador"
+                android:textColor="@color/blanco"
+                android:textSize="10sp"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:background="@drawable/bg_estado_pendiente"/>
+
+        </LinearLayout>
+
+        <!-- Fila 2: Tipo de ave + aves/días -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="10dp">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_gallina"
+                app:tint="@color/gris_hint"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="Ave"/>
+
+            <TextView
+                android:id="@+id/tvEstTipoAve"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Pollo de Engorde"
+                android:textColor="@color/gris_hint"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/tvEstAves"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 aves · 0 días"
+                android:textColor="@color/gris_hint"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+
+        <!-- Divisor -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/verde_claro"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- Fila 3: Costo total + Ganancia + ROI -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Costo total -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Costo total"
+                    android:textColor="@color/gris_hint"
+                    android:textSize="10sp"/>
+                <TextView
+                    android:id="@+id/tvEstCostoTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Q0.00"
+                    android:textColor="@color/verde_oscuro"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Ganancia -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ganancia"
+                    android:textColor="@color/gris_hint"
+                    android:textSize="10sp"/>
+                <TextView
+                    android:id="@+id/tvEstGanancia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Q0.00"
+                    android:textColor="@color/verde_primario"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- ROI -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="end">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ROI"
+                    android:textColor="@color/gris_hint"
+                    android:textSize="10sp"/>
+                <TextView
+                    android:id="@+id/tvEstRoi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.0%"
+                    android:textColor="@color/verde_primario"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Fila 4: Fecha -->
+        <TextView
+            android:id="@+id/tvEstFecha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="01/01/2025"
+            android:textColor="@color/gris_hint"
+            android:textSize="11sp"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Alerta (si existe) -->
+        <TextView
+            android:id="@+id/tvEstAlerta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#E65100"
+            android:textSize="11sp"
+            android:layout_marginTop="6dp"
+            android:visibility="gone"
+            android:maxLines="2"
+            android:ellipsize="end"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
