@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/blanco_semi">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- ── MÉTRICAS RESUMEN ── -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/verde_oscuro"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Resumen de Estimaciones"
+                        android:textColor="@color/blanco"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tvMetricaCantidad"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="0" android:textColor="@color/blanco"
+                                android:textSize="22sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Total" android:textColor="#AAFFFFFF" android:textSize="11sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tvMetricaRentables"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="0" android:textColor="@color/verde_claro"
+                                android:textSize="22sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Rentables" android:textColor="#AAFFFFFF" android:textSize="11sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tvMetricaRoi"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="0.0%" android:textColor="@color/dorado"
+                                android:textSize="22sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="ROI prom." android:textColor="#AAFFFFFF" android:textSize="11sp"/>
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tvMetricaTotal"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Q0.00" android:textColor="@color/blanco"
+                                android:textSize="14sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Costo total" android:textColor="#AAFFFFFF" android:textSize="11sp"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── FILTROS ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFiltroTodas"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="Todas"
+                    android:textAllCaps="false"
+                    android:textSize="11sp"
+                    android:textColor="@color/blanco"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_tab_activo"
+                    android:padding="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="10dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFiltroBorrador"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="2dp"
+                    android:text="Borrador"
+                    android:textAllCaps="false"
+                    android:textSize="11sp"
+                    android:textColor="@color/blanco"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_tab_inactivo"
+                    android:padding="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="10dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFiltroActiva"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="2dp"
+                    android:text="Activa"
+                    android:textAllCaps="false"
+                    android:textSize="11sp"
+                    android:textColor="@color/blanco"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_tab_inactivo"
+                    android:padding="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="10dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFiltroCompletada"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="Lista"
+                    android:textAllCaps="false"
+                    android:textSize="11sp"
+                    android:textColor="@color/blanco"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_tab_inactivo"
+                    android:padding="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    app:cornerRadius="10dp"/>
+
+            </LinearLayout>
+
+            <!-- Contador -->
+            <TextView
+                android:id="@+id/tvContadorEstimaciones"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 estimaciones"
+                android:textColor="@color/gris_hint"
+                android:textSize="12sp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Sin estimaciones -->
+            <TextView
+                android:id="@+id/tvSinEstimaciones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Aún no hay estimaciones.\nToca + para crear tu primera estimación."
+                android:textColor="@color/gris_hint"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:paddingVertical="40dp"
+                android:visibility="gone"/>
+
+            <!-- RecyclerView estimaciones -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerEstimaciones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabNuevaEstimacion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="80dp"
+        android:text="Nueva estimación"
+        app:icon="@drawable/ic_anadir"
+        app:backgroundTint="@color/verde_primario"
+        android:textColor="@color/blanco"
+        app:iconTint="@color/blanco"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
