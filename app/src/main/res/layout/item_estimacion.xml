@@ -191,5 +191,19 @@
             android:maxLines="2"
             android:ellipsize="end"/>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEstAccion"
+            style="@style/Widget.Avicola.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:minHeight="40dp"
+            android:text="🚀 Activar Producción"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:cornerRadius="10dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"/>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

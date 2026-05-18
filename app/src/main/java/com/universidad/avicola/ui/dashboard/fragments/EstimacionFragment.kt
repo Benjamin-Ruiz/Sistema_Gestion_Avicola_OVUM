@@ -48,10 +48,40 @@ class EstimacionFragment : Fragment() {
     private fun configurarRecycler() {
         adapter = EstimacionAdapter(
             onClick = { abrirDetalle(it) },
-            onLongClick = { mostrarOpciones(it) }
+            onLongClick = { mostrarOpciones(it) },
+            onActionClick = { iniciarFlujoAccion(it) }
         )
         binding.recyclerEstimaciones.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerEstimaciones.adapter = adapter
+    }
+
+    private fun iniciarFlujoAccion(est: EstimacionCostos) {
+        if (est.estado == "BORRADOR") {
+            viewModel.verificarStockParaActivar(est)
+            // El ViewModel actualizará stockInsuficiente o permitirá activarProduccion
+            mostrarConfirmarActivacion(est)
+        } else if (est.estado == "ACTIVA") {
+            // Abrir diálogo para registrar costo real y completar
+            val sheet = BottomSheetDialog(requireContext())
+            val b = com.universidad.avicola.databinding.DialogCostoRealBinding.inflate(layoutInflater)
+            sheet.setContentView(b.root)
+            b.etCostoReal.setText(est.costoTotal.toString())
+            b.btnGuardarCostoReal.setOnClickListener {
+                val real = b.etCostoReal.text.toString().toDoubleOrNull() ?: 0.0
+                viewModel.registrarCostoReal(est, real)
+                sheet.dismiss()
+            }
+            sheet.show()
+        }
+    }
+
+    private fun mostrarConfirmarActivacion(est: EstimacionCostos) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("🚀 Activar Producción")
+            .setMessage("¿Deseas activar este lote? Se descontarán los insumos del inventario.")
+            .setPositiveButton("Activar") { _, _ -> viewModel.activarProduccion(est, false) }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     private fun configurarBotones() {

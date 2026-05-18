@@ -1,13 +1,16 @@
 package com.universidad.avicola.ui.costos
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.universidad.avicola.R
 import com.universidad.avicola.data.model.EstimacionCostos
 import java.text.SimpleDateFormat
@@ -20,7 +23,8 @@ import java.util.Locale
  */
 class EstimacionAdapter(
     private val onClick: (EstimacionCostos) -> Unit,
-    private val onLongClick: (EstimacionCostos) -> Unit
+    private val onLongClick: (EstimacionCostos) -> Unit,
+    private val onActionClick: (EstimacionCostos) -> Unit
 ) : ListAdapter<EstimacionCostos, EstimacionAdapter.VH>(DIFF) {
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
@@ -34,6 +38,7 @@ class EstimacionAdapter(
         val tvRoi: TextView = view.findViewById(R.id.tvEstRoi)
         val tvEstado: TextView = view.findViewById(R.id.tvEstEstado)
         val tvAlerta: TextView = view.findViewById(R.id.tvEstAlerta)
+        val btnAccion: MaterialButton = view.findViewById(R.id.btnEstAccion)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -68,12 +73,29 @@ class EstimacionAdapter(
         // Estado badge
         holder.tvEstado.text = item.estadoDisplay()
         val bgEstado = when (item.estado) {
-            "ACTIVA" -> R.drawable.bg_estado_pagado
+            "ACTIVA" -> R.drawable.bg_badge_verde
             "BORRADOR" -> R.drawable.bg_estado_pendiente
-            "COMPLETADA" -> R.drawable.bg_badge_verde
+            "COMPLETADA" -> R.drawable.bg_estado_pagado
             else -> R.drawable.bg_estado_parcial
         }
         holder.tvEstado.setBackgroundResource(bgEstado)
+
+        // Lógica del botón de acción (Activar / Completar)
+        when (item.estado) {
+            "BORRADOR" -> {
+                holder.btnAccion.visibility = View.VISIBLE
+                holder.btnAccion.text = "🚀 Activar Producción"
+                holder.btnAccion.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.verde_primario))
+            }
+            "ACTIVA" -> {
+                holder.btnAccion.visibility = View.VISIBLE
+                holder.btnAccion.text = "✅ Completar Lote"
+                holder.btnAccion.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.dorado))
+            }
+            else -> {
+                holder.btnAccion.visibility = View.GONE
+            }
+        }
 
         // Alertas
         if (item.tieneAlertas()) {
@@ -83,6 +105,7 @@ class EstimacionAdapter(
             holder.tvAlerta.visibility = View.GONE
         }
 
+        holder.btnAccion.setOnClickListener { onActionClick(item) }
         holder.card.setOnClickListener { onClick(item) }
         holder.card.setOnLongClickListener { onLongClick(item); true }
     }
