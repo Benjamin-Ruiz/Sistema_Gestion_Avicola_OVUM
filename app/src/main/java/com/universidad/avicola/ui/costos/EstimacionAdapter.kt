@@ -81,16 +81,19 @@ class EstimacionAdapter(
         holder.tvEstado.setBackgroundResource(bgEstado)
 
         // Lógica del botón de acción (Activar / Completar)
+        val ctx_color = ContextCompat.getColor(ctx, R.color.verde_primario)
+        val ctx_color_dorado = ContextCompat.getColor(ctx, R.color.dorado)
+
         when (item.estado) {
             "BORRADOR" -> {
                 holder.btnAccion.visibility = View.VISIBLE
-                holder.btnAccion.text = "🚀 Activar Producción"
-                holder.btnAccion.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.verde_primario))
+                holder.btnAccion.text = "Activar Producción"
+                holder.btnAccion.backgroundTintList = ColorStateList.valueOf(ctx_color)
             }
             "ACTIVA" -> {
                 holder.btnAccion.visibility = View.VISIBLE
                 holder.btnAccion.text = "✅ Completar Lote"
-                holder.btnAccion.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.dorado))
+                holder.btnAccion.backgroundTintList = ColorStateList.valueOf(ctx_color_dorado)
             }
             else -> {
                 holder.btnAccion.visibility = View.GONE

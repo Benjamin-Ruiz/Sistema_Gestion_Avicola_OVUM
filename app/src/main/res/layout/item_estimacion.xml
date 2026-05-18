@@ -198,7 +198,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:minHeight="40dp"
-            android:text="🚀 Activar Producción"
+            android:text="Activar Producción"
             android:textSize="12sp"
             android:visibility="gone"
             app:cornerRadius="10dp"

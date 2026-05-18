@@ -9,7 +9,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.universidad.avicola.R
 import com.universidad.avicola.data.model.*
 import com.universidad.avicola.databinding.ActivityCostosBinding
@@ -49,8 +48,9 @@ class CostosActivity : AppCompatActivity() {
 
     private fun configurarRecycler() {
         adapter = EstimacionAdapter(
-            onClick    = { abrirDetalle(it) },
-            onLongClick = { mostrarOpciones(it) }
+            onClick       = { abrirDetalle(it) },
+            onLongClick    = { mostrarOpciones(it) },
+            onActionClick = { manejarAccionRapida(it) }
         )
         binding.recyclerEstimaciones.apply {
             layoutManager = LinearLayoutManager(this@CostosActivity)
@@ -133,7 +133,7 @@ class CostosActivity : AppCompatActivity() {
 
             if (resultado.isEmpty()) {
                 // Todo el stock es suficiente → confirmar y activar directamente
-                mostrarDialogoConfirmarActivacion(estimacion, insuficientes = emptyList())
+                mostrarDialogoConfirmarActivacion(estimacion)
             } else {
                 // Hay insumos insuficientes → mostrar alerta detallada
                 mostrarAlertaStockInsuficiente(estimacion, resultado)
@@ -142,22 +142,39 @@ class CostosActivity : AppCompatActivity() {
     }
 
     // ══════════════════════════════════════════════════════════════════
+    //  ACCIONES RÁPIDAS
+    // ══════════════════════════════════════════════════════════════════
+
+    private fun manejarAccionRapida(estimacion: EstimacionCostos) {
+        when (estimacion.estado) {
+            EstadoEstimacion.BORRADOR.name -> iniciarFlujoActivacion(estimacion)
+            EstadoEstimacion.ACTIVA.name -> abrirDialogCostoReal(estimacion)
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
     //  OPCIONES EN LONG PRESS
     // ══════════════════════════════════════════════════════════════════
 
     private fun mostrarOpciones(e: EstimacionCostos) {
-        val opciones = mutableListOf("Ver detalle", "Editar", "Duplicar", "Enviar a Finanzas", "Eliminar")
-        if (e.estado == EstadoEstimacion.BORRADOR.name) opciones.add(2, "Activar producción")
+        val opciones = mutableListOf<String>()
+        
+        // Si es borrador, la opción más importante es Activar Producción
+        if (e.estado.equals("BORRADOR", ignoreCase = true)) {
+            opciones.add("Activar producción")
+        }
+        
+        opciones.addAll(listOf("Ver detalle", "Editar", "Duplicar", "Enviar a Finanzas", "Eliminar"))
 
         AlertDialog.Builder(this)
             .setTitle(e.loteNombre.ifEmpty { "Estimación" })
             .setItems(opciones.toTypedArray()) { _, cual ->
                 when (opciones[cual]) {
+                    "Activar producción" -> iniciarFlujoActivacion(e)
                     "Ver detalle"        -> abrirDetalle(e)
                     "Editar"             -> abrirFormulario(e)
                     "Duplicar"           -> viewModel.duplicarEstimacion(e.id)
                     "Enviar a Finanzas"  -> viewModel.enviarCostoAFinanzas(e)
-                    "Activar producción" -> iniciarFlujoActivacion(e)
                     "Eliminar"           -> confirmarEliminar(e)
                 }
             }.show()
@@ -193,8 +210,7 @@ class CostosActivity : AppCompatActivity() {
      * Diálogo estándar cuando el inventario tiene stock suficiente para todo.
      */
     private fun mostrarDialogoConfirmarActivacion(
-        estimacion: EstimacionCostos,
-        insuficientes: List<String>
+        estimacion: EstimacionCostos
     ) {
         AlertDialog.Builder(this)
             .setTitle("✅ Activar producción")
@@ -307,29 +323,40 @@ class CostosActivity : AppCompatActivity() {
             cardAlertas.visibility = View.GONE
         }
 
-        // ── Botón ACTIVAR PRODUCCIÓN ─────────────────────────────────────────
-        // Solo visible si la estimación está en estado BORRADOR
-        val btnActivar = view.findViewById<View>(R.id.btnDetActivar)
-        if (e.estado == EstadoEstimacion.BORRADOR.name) {
-            btnActivar.visibility = View.VISIBLE
-            btnActivar.setOnClickListener {
-                sheet.dismiss()
-                iniciarFlujoActivacion(e)       // ← usa el flujo completo con verificación
-            }
-        } else {
-            btnActivar.visibility = View.GONE
+        // ── LÓGICA DE BOTONES SEGÚN ESTADO ──────────────────────────────────
+        val btnActivar   = view.findViewById<View>(R.id.btnDetActivar)
+        val btnEditar    = view.findViewById<View>(R.id.btnDetEditar)
+        val btnCostoReal = view.findViewById<View>(R.id.btnDetCostoReal)
+        val btnFinanzas  = view.findViewById<View>(R.id.btnDetFinanzas)
+
+        val esBorrador   = e.estado.equals("BORRADOR", ignoreCase = true)
+        val esActiva     = e.estado.equals("ACTIVA", ignoreCase = true)
+
+        // 1. Activar solo en borrador
+        btnActivar.visibility = if (esBorrador) View.VISIBLE else View.GONE
+        btnActivar.setOnClickListener {
+            sheet.dismiss()
+            iniciarFlujoActivacion(e)
         }
 
-        // Botones existentes
-        view.findViewById<View>(R.id.btnDetEditar).setOnClickListener {
+        // 2. Editar en borrador o activa
+        btnEditar.visibility = if (esBorrador || esActiva) View.VISIBLE else View.GONE
+        btnEditar.setOnClickListener {
             sheet.dismiss(); abrirFormulario(e)
         }
-        view.findViewById<View>(R.id.btnDetFinanzas).setOnClickListener {
-            viewModel.enviarCostoAFinanzas(e); sheet.dismiss()
-        }
-        view.findViewById<View>(R.id.btnDetCostoReal).setOnClickListener {
+
+        // 3. Costo real solo si ya está activa
+        btnCostoReal.visibility = if (esActiva) View.VISIBLE else View.GONE
+        btnCostoReal.setOnClickListener {
             sheet.dismiss(); abrirDialogCostoReal(e)
         }
+
+        // 4. Finanzas disponible para enviar proyecciones o cierres
+        btnFinanzas.visibility = View.VISIBLE
+        btnFinanzas.setOnClickListener {
+            viewModel.enviarCostoAFinanzas(e); sheet.dismiss()
+        }
+
         view.findViewById<View>(R.id.btnDetCerrar).setOnClickListener { sheet.dismiss() }
 
         sheet.show()

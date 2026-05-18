@@ -194,11 +194,15 @@
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:nestedScrollingEnabled="false"/>
 
-                        <Button android:id="@+id/btnAgregarFase"
-                            android:layout_width="match_parent" android:layout_height="40dp"
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnAgregarFase"
+                            style="@style/Widget.Avicola.Button.Primary"
+                            android:layout_width="match_parent" android:layout_height="44dp"
                             android:text="+ Agregar fase" android:textAllCaps="false"
-                            android:textColor="@color/verde_primario" android:textSize="13sp"
-                            android:background="@drawable/bg_tab_inactivo" android:layout_marginTop="8dp"/>
+                            android:textSize="13sp"
+                            android:layout_marginTop="8dp"
+                            app:cornerRadius="10dp"
+                            android:insetTop="0dp" android:insetBottom="0dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -232,11 +236,15 @@
                             android:id="@+id/recyclerSanitarios"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:nestedScrollingEnabled="false"/>
-                        <Button android:id="@+id/btnAgregarSanitario"
-                            android:layout_width="match_parent" android:layout_height="40dp"
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnAgregarSanitario"
+                            style="@style/Widget.Avicola.Button.Primary"
+                            android:layout_width="match_parent" android:layout_height="44dp"
                             android:text="+ Agregar ítem sanitario" android:textAllCaps="false"
-                            android:textColor="@color/verde_primario" android:textSize="13sp"
-                            android:background="@drawable/bg_tab_inactivo" android:layout_marginTop="8dp"/>
+                            android:textSize="13sp"
+                            android:layout_marginTop="8dp"
+                            app:cornerRadius="10dp"
+                            android:insetTop="0dp" android:insetBottom="0dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
