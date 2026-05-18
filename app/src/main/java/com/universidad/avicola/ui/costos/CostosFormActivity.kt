@@ -22,6 +22,12 @@ import java.util.UUID
  * Formulario completo de estimación con cálculo en tiempo real.
  * El usuario configura todos los parámetros y los resultados
  * se actualizan automáticamente al cambiar cualquier valor.
+ *
+ * Fix v2:
+ *  - Al abrir el formulario y al volver a primer plano, se fuerza un refresh
+ *    inmediato del inventario desde Firestore (con reconciliación de borrados),
+ *    para que los spinners de alimentos y medicinas reflejen únicamente lo
+ *    que existe actualmente en el módulo de Inventario.
  */
 class CostosFormActivity : AppCompatActivity() {
 
@@ -60,11 +66,23 @@ class CostosFormActivity : AppCompatActivity() {
         observarViewModel()
 
         if (estimacionId.isNotEmpty()) cargarEstimacionExistente()
+
+        // FIX: refrescar inventario apenas se abre el formulario para
+        // limpiar productos fantasma antes de que se llenen los spinners.
+        viewModel.recargarInventario()
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    override fun onResume() {
+        super.onResume()
+        // FIX: si el usuario fue al módulo de Inventario a agregar o eliminar
+        // productos y vuelve aquí, garantizar que los spinners reflejen el
+        // estado actual del inventario.
+        viewModel.recargarInventario()
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     //  CONFIGURACIÓN INICIAL
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     private fun configurarLoteSpinner() {
         loteAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mutableListOf("Sin lote asignado"))
@@ -192,9 +210,9 @@ class CostosFormActivity : AppCompatActivity() {
         view.visibility = if (view.visibility == View.VISIBLE) View.GONE else View.VISIBLE
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  OBSERVADORES
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     private fun observarViewModel() {
         viewModel.lotes.observe(this) { lotes ->
@@ -206,9 +224,16 @@ class CostosFormActivity : AppCompatActivity() {
         }
 
         viewModel.productos.observe(this) { productos ->
+            // El Flow emite cada vez que Room cambia (incluido cuando el sync
+            // reconcilia y elimina productos obsoletos), por lo que los spinners
+            // siempre reflejarán el estado real del inventario.
             productosDisponibles = productos
             faseAdapter.actualizarProductos(productos)
             sanitarioAdapter.actualizarProductos(productos)
+
+            // Limpiar vínculos huérfanos: si una fase apunta a un producto que
+            // ya no existe, desvincularla (evita guardar IDs muertos).
+            limpiarVinculosHuerfanos(productos)
         }
 
         viewModel.resultado.observe(this) { r ->
@@ -224,9 +249,48 @@ class CostosFormActivity : AppCompatActivity() {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    /**
+     * Si una fase o ítem sanitario tiene vinculado un producto que ya no existe
+     * en el inventario actual, lo desvincula automáticamente. Esto previene
+     * guardar estimaciones con IDs fantasma y mantiene la consistencia.
+     */
+    private fun limpiarVinculosHuerfanos(productosActuales: List<ProductoInventario>) {
+        val idsValidos = productosActuales.map { it.id }.toSet()
+        var huboCambios = false
+
+        for (i in fasesActuales.indices) {
+            val fase = fasesActuales[i]
+            if (fase.productoInventarioId.isNotEmpty() && fase.productoInventarioId !in idsValidos) {
+                fasesActuales[i] = fase.copy(
+                    productoInventarioId = "",
+                    productoNombre = "",
+                    precioKg = 0.0,
+                    stockDisponible = 0.0
+                )
+                huboCambios = true
+            }
+        }
+        for (i in itemsSanitarios.indices) {
+            val item = itemsSanitarios[i]
+            if (item.productoInventarioId.isNotEmpty() && item.productoInventarioId !in idsValidos) {
+                itemsSanitarios[i] = item.copy(
+                    productoInventarioId = "",
+                    precioUnitario = 0.0,
+                    stockDisponible = 0.0
+                )
+                huboCambios = true
+            }
+        }
+        if (huboCambios) {
+            faseAdapter.notifyDataSetChanged()
+            sanitarioAdapter.notifyDataSetChanged()
+            recalcular()
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     //  CÁLCULO EN TIEMPO REAL
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     private fun recalcular() {
         val cantidad = binding.etCantidadAves.text.toString().toIntOrNull() ?: return
@@ -288,9 +352,9 @@ class CostosFormActivity : AppCompatActivity() {
         binding.seccionResultados.visibility = View.VISIBLE
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  GUARDAR
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     private fun guardar() {
         val cantidad = binding.etCantidadAves.text.toString().toIntOrNull()
@@ -336,9 +400,9 @@ class CostosFormActivity : AppCompatActivity() {
         viewModel.guardarEstimacion(estimacion)
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  CARGAR ESTIMACIÓN EXISTENTE
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     private fun cargarEstimacionExistente() {
         viewModel.estimaciones.observe(this) { lista ->

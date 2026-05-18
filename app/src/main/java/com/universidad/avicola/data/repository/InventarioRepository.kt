@@ -19,32 +19,81 @@ import kotlinx.coroutines.tasks.await
 
 /**
  * InventarioRepository.kt — Versión Offline-First (Room + Sync)
+ *
+ * Fix v2:
+ *  - eliminarProducto() ahora es offline-safe (usa tombstones en SharedPreferences).
+ *  - Nuevo método forzarSincronizacionRemota() para pull inmediato bajo demanda
+ *    (lo usa el módulo de Costos al abrir el formulario).
  */
 class InventarioRepository(context: Context) {
 
+    private val ctx = context.applicationContext
     private val db = Firebase.firestore
     private val colProductos = db.collection("inventario")
     private val colLogs = db.collection("inventory_logs")
-    
-    private val app = context.applicationContext as AvicolaApp
+
+    private val app = ctx as AvicolaApp
     private val dao = app.database.productoDao()
     private val workManager = WorkManager.getInstance(context)
 
-    // ════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  PRODUCTOS — READ (Desde Room)
-    // ════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     fun obtenerProductos(): Flow<List<ProductoInventario>> {
         // Disparar una sincronización rápida al abrir para tener datos frescos
         triggerSync()
-        return dao.getAllFlow().map { entities -> 
-            entities.map { it.toDomain() } 
+        return dao.getAllFlow().map { entities ->
+            entities.map { it.toDomain() }
         }
     }
 
-    // ════════════════════════════════════════════════
+    /**
+     * Fuerza una sincronización inmediata (push pendientes + pull remoto con
+     * reconciliación de borrados). Se llama bajo demanda, p. ej. al abrir el
+     * formulario de Costos para garantizar que los spinners reflejen el
+     * estado real del inventario.
+     *
+     * Retorna éxito incluso si no hay red: en ese caso el caller seguirá viendo
+     * los datos locales actuales y la sincronización ocurrirá automáticamente
+     * cuando vuelva la conexión.
+     */
+    suspend fun forzarSincronizacionRemota(): Result<Unit> {
+        return try {
+            // 1. PUSH cambios locales pendientes
+            val unsynced = dao.getUnsynced()
+            for (productoEntity in unsynced) {
+                try {
+                    colProductos.document(productoEntity.id)
+                        .set(productoToMap(productoEntity.toDomain()))
+                        .await()
+                    dao.markAsSynced(productoEntity.id)
+                } catch (_: Exception) {
+                    // si falla, el WorkManager lo reintentará
+                }
+            }
+
+            // 2. PUSH borrados pendientes (tombstones)
+            procesarBorradosPendientes()
+
+            // 3. PULL remoto y reconciliar con local
+            val snapshot = colProductos.get().await()
+            val remoteProductos = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(ProductoInventario::class.java)?.copy(id = doc.id)
+            }
+            val entities = remoteProductos.map { ProductoEntity.fromDomain(it, true) }
+            dao.reconciliarConRemoto(entities)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            // Si no hay red, los datos locales seguirán mostrándose. No es un error fatal.
+            Result.failure(e)
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     //  PRODUCTOS — CRUD (Afecta Room y dispara Sync)
-    // ════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     suspend fun agregarProducto(producto: ProductoInventario): Result<String> {
         return try {
@@ -55,7 +104,7 @@ class InventarioRepository(context: Context) {
             // 2. Guardar en Room inmediatamente (isSynced = false)
             dao.insert(ProductoEntity.fromDomain(pConId, isSynced = false))
 
-            // 3. Registrar log localmente (Opcional, podrías tener una tabla de logs)
+            // 3. Registrar log localmente
             registrarLog(id, pConId.nombre, pConId.cantidad, "Ingreso inicial")
 
             // 4. Disparar WorkManager para subir a la nube en cuanto haya internet
@@ -91,19 +140,64 @@ class InventarioRepository(context: Context) {
         }
     }
 
+    /**
+     * Eliminación offline-safe:
+     *  - Siempre borra de Room inmediatamente (la UI reacciona al instante).
+     *  - Intenta borrar de Firestore. Si falla (sin red), guarda el ID en
+     *    una lista de "borrados pendientes" para procesarlos en el próximo sync.
+     *  - Así el pull no puede "resucitar" el producto en el próximo ciclo.
+     */
     suspend fun eliminarProducto(id: String, nombre: String): Result<Unit> {
         return try {
-            // 1. Eliminar de Room
+            // 1. Borrar de Room siempre
             dao.deleteById(id)
 
-            // 2. En una app pro, marcaríamos como "borrado" para sincronizar el borrado.
-            // Por ahora, intentamos borrar de Firebase directamente si hay red.
-            colProductos.document(id).delete().await()
-            
-            registrarLog(id, nombre, 0.0, "Producto eliminado")
+            // 2. Intentar borrar de Firestore
+            var firestoreOk = false
+            try {
+                colProductos.document(id).delete().await()
+                firestoreOk = true
+            } catch (_: Exception) {
+                // Sin red u otro error — encolar tombstone
+                agregarBorradoPendiente(id)
+                triggerSync()
+            }
+
+            // 3. Log
+            registrarLog(id, nombre, 0.0, if (firestoreOk) "Producto eliminado" else "Eliminado (pendiente de sincronizar)")
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    // ───────────────────── Tombstones de borrados pendientes ──────────────
+
+    private fun agregarBorradoPendiente(id: String) {
+        val prefs = ctx.getSharedPreferences("pending_deletes", Context.MODE_PRIVATE)
+        val actuales = prefs.getStringSet("inventario", emptySet())?.toMutableSet() ?: mutableSetOf()
+        actuales.add(id)
+        prefs.edit().putStringSet("inventario", actuales).apply()
+    }
+
+    private suspend fun procesarBorradosPendientes() {
+        val prefs = ctx.getSharedPreferences("pending_deletes", Context.MODE_PRIVATE)
+        val pending = prefs.getStringSet("inventario", emptySet())?.toMutableSet() ?: return
+        if (pending.isEmpty()) return
+
+        val confirmados = mutableSetOf<String>()
+        for (id in pending) {
+            try {
+                colProductos.document(id).delete().await()
+                confirmados.add(id)
+            } catch (_: Exception) {
+                // se reintentará luego
+            }
+        }
+        if (confirmados.isNotEmpty()) {
+            pending.removeAll(confirmados)
+            prefs.edit().putStringSet("inventario", pending).apply()
         }
     }
 
@@ -123,9 +217,9 @@ class InventarioRepository(context: Context) {
         )
     }
 
-    // ════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  HISTORIAL DE MOVIMIENTOS
-    // ════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     fun obtenerLogsPorProducto(productoId: String): Flow<List<InventoryLog>> = callbackFlow {
         val listener = colLogs
@@ -161,9 +255,9 @@ class InventarioRepository(context: Context) {
         }
     }
 
-    // ════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  HELPERS
-    // ════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     private fun productoToMap(p: ProductoInventario): Map<String, Any> = mapOf(
         "nombre" to p.nombre,

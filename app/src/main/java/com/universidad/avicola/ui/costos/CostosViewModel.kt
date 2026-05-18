@@ -14,12 +14,15 @@ import kotlinx.coroutines.launch
 /**
  * CostosViewModel.kt
  * Ubicación: app/src/main/java/com/universidad/avicola/ui/costos/
+ *
+ * Fix v2: nuevo método recargarInventario() para forzar refresh de productos
+ * desde Firestore (con reconciliación de obsoletos) antes de mostrar spinners.
  */
 class CostosViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repo = CostosRepository(app)
 
-    // ── Listas observables ───────────────────────────────────────────────────
+    // ── Listas observables ────────────────────────────────────────────────
     private val _estimaciones = MutableLiveData<List<EstimacionCostos>>(emptyList())
     val estimaciones: LiveData<List<EstimacionCostos>> = _estimaciones
 
@@ -29,27 +32,29 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
     private val _productos = MutableLiveData<List<ProductoInventario>>(emptyList())
     val productos: LiveData<List<ProductoInventario>> = _productos
 
-    // ── Resultado de cálculo en tiempo real ─────────────────────────────────
+    // ── Estimación en edición ─────────────────────────────────────────────
+    private val _estimacionActual = MutableLiveData<EstimacionCostos?>(null)
+    val estimacionActual: LiveData<EstimacionCostos?> = _estimacionActual
+
+    // ── Resultado de cálculo en tiempo real ───────────────────────────────
     private val _resultado = MutableLiveData<ResultadoCalculo?>(null)
     val resultado: LiveData<ResultadoCalculo?> = _resultado
 
-    // ── Mensajes y estado ────────────────────────────────────────────────────
-    private val _mensaje = MutableLiveData("")
+    // ── Mensajes y estado ─────────────────────────────────────────────────
+    private val _mensaje = MutableLiveData<String>("")
     val mensaje: LiveData<String> = _mensaje
 
-    private val _cargando = MutableLiveData(false)
+    private val _cargando = MutableLiveData<Boolean>(false)
     val cargando: LiveData<Boolean> = _cargando
 
-    /**
-     * Resultado de la verificación de stock antes de activar producción.
-     * - null  → no se ha verificado todavía
-     * - Empty → stock suficiente para todo
-     * - Non-empty → lista de insumos con stock insuficiente
-     */
     private val _stockInsuficiente = MutableLiveData<List<String>?>(null)
     val stockInsuficiente: LiveData<List<String>?> = _stockInsuficiente
 
-    // ── Filtros ───────────────────────────────────────────────────────────────
+    // Estado específico del refresh de inventario (para mostrar progress en form)
+    private val _sincronizandoInventario = MutableLiveData<Boolean>(false)
+    val sincronizandoInventario: LiveData<Boolean> = _sincronizandoInventario
+
+    // ── Filtros ───────────────────────────────────────────────────────────
     private val _estimacionesFiltradas = MutableLiveData<List<EstimacionCostos>>(emptyList())
     val estimacionesFiltradas: LiveData<List<EstimacionCostos>> = _estimacionesFiltradas
 
@@ -62,9 +67,9 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
         cargarProductos()
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  CARGA
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
+    //  CARGA DE DATOS
+    // ═══════════════════════════════════════════════════════════════════════
 
     private fun cargarEstimaciones() {
         viewModelScope.launch {
@@ -87,9 +92,31 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    /**
+     * Fuerza un pull inmediato del inventario desde Firestore (con reconciliación
+     * de borrados). El Flow ya colectándose se encargará de propagar los cambios
+     * a la UI vía LiveData<List<ProductoInventario>>.
+     *
+     * Se debe llamar:
+     *  - Al abrir CostosFormActivity (onCreate)
+     *  - Al volver a primer plano (onResume), por si el usuario fue al módulo
+     *    de Inventario a agregar/eliminar productos.
+     */
+    fun recargarInventario() {
+        viewModelScope.launch {
+            _sincronizandoInventario.value = true
+            repo.forzarSincronizacionInventario()
+                .onFailure {
+                    // Sin red: los datos locales actuales seguirán mostrándose.
+                    // No mostramos error intrusivo; es un refresh "best-effort".
+                }
+            _sincronizandoInventario.value = false
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     //  CÁLCULO EN TIEMPO REAL
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     fun recalcular(
         cantidadAves: Int,
@@ -102,55 +129,58 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
         costoAveInicial: Double = 0.0
     ) {
         if (cantidadAves <= 0) return
-        _resultado.value = CostosCalculator.calcular(
-            cantidadAves         = cantidadAves,
-            diasCrianza          = diasCrianza,
-            fases                = fases,
-            itemsSanitarios      = itemsSanitarios,
-            costosOperativos     = costosOperativos,
+        val resultado = CostosCalculator.calcular(
+            cantidadAves = cantidadAves,
+            diasCrianza = diasCrianza,
+            fases = fases,
+            itemsSanitarios = itemsSanitarios,
+            costosOperativos = costosOperativos,
             porcentajeMortalidad = porcentajeMortalidad,
-            precioVentaUnitario  = precioVentaUnitario,
-            costoAveInicial      = costoAveInicial
+            precioVentaUnitario = precioVentaUnitario,
+            costoAveInicial = costoAveInicial
         )
+        _resultado.value = resultado
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  CRUD
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     fun guardarEstimacion(estimacion: EstimacionCostos) {
         viewModelScope.launch {
             _cargando.value = true
+            // Enriquecer con precios reales antes de guardar
             val productos = _productos.value ?: emptyList()
-
             val fasesEnriquecidas = repo.enriquecerFasesConInventario(estimacion.fases, productos)
-            val itemsEnriquecidos = repo.enriquecerItemsSanitariosConInventario(
-                estimacion.itemsSanitarios, productos
-            )
+            val itemsEnriquecidos = repo.enriquecerItemsSanitariosConInventario(estimacion.itemsSanitarios, productos)
+
+            // Recalcular resultado final con datos enriquecidos
             val resultado = CostosCalculator.calcular(
-                cantidadAves         = estimacion.cantidadAves,
-                diasCrianza          = estimacion.diasCrianza,
-                fases                = fasesEnriquecidas,
-                itemsSanitarios      = itemsEnriquecidos,
-                costosOperativos     = estimacion.costosOperativos,
+                cantidadAves = estimacion.cantidadAves,
+                diasCrianza = estimacion.diasCrianza,
+                fases = fasesEnriquecidas,
+                itemsSanitarios = itemsEnriquecidos,
+                costosOperativos = estimacion.costosOperativos,
                 porcentajeMortalidad = estimacion.porcentajeMortalidad,
-                precioVentaUnitario  = estimacion.precioVentaUnitario
+                precioVentaUnitario = estimacion.precioVentaUnitario
             )
+
             val estimacionFinal = estimacion.copy(
-                fases                   = fasesEnriquecidas,
-                itemsSanitarios         = itemsEnriquecidos,
-                costoAlimentacionTotal  = resultado.costoAlimentacion,
-                costoSanitarioTotal     = resultado.costoSanitario,
-                costoOperativoTotal     = resultado.costoOperativo,
-                perdidaMortalidad       = resultado.perdidaMortalidad,
-                costoTotal              = resultado.costoTotal,
-                costoPorAve             = resultado.costoPorAve,
-                ingresoEstimado         = resultado.ingresoEstimado,
-                gananciaNeta            = resultado.gananciaNeta,
-                roi                     = resultado.roi,
+                fases = fasesEnriquecidas,
+                itemsSanitarios = itemsEnriquecidos,
+                costoAlimentacionTotal = resultado.costoAlimentacion,
+                costoSanitarioTotal = resultado.costoSanitario,
+                costoOperativoTotal = resultado.costoOperativo,
+                perdidaMortalidad = resultado.perdidaMortalidad,
+                costoTotal = resultado.costoTotal,
+                costoPorAve = resultado.costoPorAve,
+                ingresoEstimado = resultado.ingresoEstimado,
+                gananciaNeta = resultado.gananciaNeta,
+                roi = resultado.roi,
                 puntoEquilibrioUnidades = resultado.puntoEquilibrioUnidades,
-                alertas                 = resultado.alertas
+                alertas = resultado.alertas
             )
+
             repo.guardarEstimacion(estimacionFinal)
                 .onSuccess { _mensaje.value = "Estimación guardada correctamente" }
                 .onFailure { _mensaje.value = "Error al guardar: ${it.message}" }
@@ -174,9 +204,9 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  INTEGRACIÓN FINANZAS
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     fun enviarCostoAFinanzas(estimacion: EstimacionCostos) {
         viewModelScope.launch {
@@ -194,70 +224,58 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  ACTIVAR PRODUCCIÓN — con verificación de stock previa
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
+    //  INTEGRACIÓN INVENTARIO
+    // ═══════════════════════════════════════════════════════════════════════
 
-    /**
-     * Paso 1: Verificar stock ANTES de mostrar el diálogo de confirmación.
-     * El resultado se publica en [stockInsuficiente]:
-     *   - Lista vacía  → todo el inventario es suficiente
-     *   - Lista con items → hay insumos insuficientes; la Activity los muestra al usuario
-     */
-    fun verificarStockParaActivar(estimacion: EstimacionCostos) {
-        viewModelScope.launch {
-            _cargando.value = true
-            val productos = _productos.value ?: emptyList()
-            val insuficientes = repo.verificarStockParaProduccion(estimacion, productos)
-            _stockInsuficiente.value = insuficientes
-            _cargando.value = false
-        }
-    }
-
-    /** Limpia el resultado de la verificación después de que la Activity lo procesó. */
     fun limpiarVerificacionStock() {
         _stockInsuficiente.value = null
     }
 
-    /**
-     * Paso 2: Activar producción.
-     * Llamar solo después de que el usuario confirmó (con o sin advertencia de stock).
-     *
-     * @param forzar Si true, activa aunque haya insumos insuficientes
-     *               (descuenta solo los que alcancen y omite los demás).
-     */
+    fun verificarStockParaActivar(estimacion: EstimacionCostos) {
+        val insuficientes = mutableListOf<String>()
+        val productos = _productos.value ?: emptyList()
+
+        estimacion.fases.forEach { fase ->
+            if (fase.productoInventarioId.isNotEmpty()) {
+                val p = productos.firstOrNull { it.id == fase.productoInventarioId }
+                val stock = p?.cantidad ?: 0.0
+                val consumo = fase.consumoTotalKg(estimacion.cantidadAves)
+                if (stock < consumo) {
+                    insuficientes.add("${fase.productoNombre}: faltan ${String.format("%.2f", consumo - stock)} kg")
+                }
+            }
+        }
+
+        estimacion.itemsSanitarios.forEach { item ->
+            if (item.productoInventarioId.isNotEmpty()) {
+                val p = productos.firstOrNull { it.id == item.productoInventarioId }
+                val stock = p?.cantidad ?: 0.0
+                if (stock < item.dosisParaLote) {
+                    insuficientes.add("${item.nombre}: faltan ${String.format("%.2f", item.dosisParaLote - stock)} unidades")
+                }
+            }
+        }
+        _stockInsuficiente.value = insuficientes
+    }
+
     fun activarProduccion(estimacion: EstimacionCostos, forzar: Boolean = false) {
         viewModelScope.launch {
             _cargando.value = true
             val productos = _productos.value ?: emptyList()
-
-            // Si no se fuerza, verificar una última vez
-            if (!forzar) {
-                val insuficientes = repo.verificarStockParaProduccion(estimacion, productos)
-                if (insuficientes.isNotEmpty()) {
-                    // La Activity debe haber manejado esto antes de llegar aquí,
-                    // pero lo capturamos por seguridad
-                    _stockInsuficiente.value = insuficientes
-                    _cargando.value = false
-                    return@launch
-                }
-            }
-
             repo.descontarInventarioParaProduccion(estimacion, productos)
                 .onSuccess {
                     guardarEstimacion(estimacion.copy(estado = EstadoEstimacion.ACTIVA.name))
-                    _mensaje.value = "✔ Producción activada. Inventario actualizado."
+                    _mensaje.value = "Producción activada. Inventario actualizado."
                 }
-                .onFailure {
-                    _mensaje.value = "Error al activar producción: ${it.message}"
-                }
+                .onFailure { _mensaje.value = "Error al activar producción: ${it.message}" }
             _cargando.value = false
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  FILTROS
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     fun setFiltroEstado(estado: String?) {
         filtroEstado = estado
@@ -276,18 +294,23 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
         _estimacionesFiltradas.value = filtrada
     }
 
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  HELPERS UI
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
-    fun iniciarNuevaEstimacion(): EstimacionCostos = EstimacionCostos(
-        fases            = CostosCalculator.fasesDefault(TipoAveEstimacion.ENGORDE),
-        costosOperativos = CostosCalculator.costosOperativosDefault()
-    )
+    fun iniciarNuevaEstimacion(): EstimacionCostos {
+        val primeraFases = CostosCalculator.fasesDefault(TipoAveEstimacion.ENGORDE)
+        val costosOp = CostosCalculator.costosOperativosDefault()
+        return EstimacionCostos(
+            fases = primeraFases,
+            costosOperativos = costosOp
+        )
+    }
 
     fun fasesDefaultParaTipo(tipo: TipoAveEstimacion): List<FaseAlimentacion> =
         CostosCalculator.fasesDefault(tipo)
 
+    /** Métricas resumen para la pantalla principal */
     data class MetricasResumen(
         val totalEstimaciones: Int,
         val roiPromedio: Double,
@@ -298,9 +321,9 @@ class CostosViewModel(app: Application) : AndroidViewModel(app) {
     fun calcularMetricas(lista: List<EstimacionCostos>): MetricasResumen {
         val activas = lista.filter { it.estado != EstadoEstimacion.ARCHIVADA.name }
         return MetricasResumen(
-            totalEstimaciones     = activas.size,
-            roiPromedio           = if (activas.isEmpty()) 0.0 else activas.map { it.roi }.average(),
-            costoTotalAcumulado   = activas.sumOf { it.costoTotal },
+            totalEstimaciones = activas.size,
+            roiPromedio = if (activas.isEmpty()) 0.0 else activas.map { it.roi }.average(),
+            costoTotalAcumulado = activas.sumOf { it.costoTotal },
             estimacionesRentables = activas.count { it.isRentable() }
         )
     }

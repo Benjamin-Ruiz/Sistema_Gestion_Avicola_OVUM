@@ -11,6 +11,15 @@ import java.util.UUID
 /**
  * CostosRepository.kt
  * Ubicación: app/src/main/java/com/universidad/avicola/data/repository/
+ *
+ * Repositorio del módulo Estimación de Costos.
+ * - Persistencia local con Room
+ * - Integración con InventarioRepository (precios reales)
+ * - Integración con FinanzasRepository (envío de costos proyectados)
+ * - Integración con AvesRepository (lotes activos)
+ *
+ * Fix v2: expone forzarSincronizacionInventario() para que el formulario
+ * pueda solicitar un refresh inmediato antes de mostrar los spinners.
  */
 class CostosRepository(context: Context) {
 
@@ -18,18 +27,18 @@ class CostosRepository(context: Context) {
     private val dao = app.database.estimacionCostosDao()
 
     private val inventarioRepo = InventarioRepository(context)
-    private val finanzasRepo   = FinanzasRepository()
-    private val avesRepo       = AvesRepository(context)
+    private val finanzasRepo = FinanzasRepository()
+    private val avesRepo = AvesRepository(context)
 
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
     //  CRUD Estimaciones
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
 
     fun obtenerEstimaciones(): Flow<List<EstimacionCostos>> =
-        dao.getAllFlow().map { lista -> lista.map { it.toDomain() } }
+        dao.getAllFlow().map { it.map { e -> e.toDomain() } }
 
     fun obtenerPorLote(loteId: String): Flow<List<EstimacionCostos>> =
-        dao.getPorLote(loteId).map { lista -> lista.map { it.toDomain() } }
+        dao.getPorLote(loteId).map { it.map { e -> e.toDomain() } }
 
     suspend fun guardarEstimacion(estimacion: EstimacionCostos): Result<String> {
         return try {
@@ -50,108 +59,82 @@ class CostosRepository(context: Context) {
         }
     }
 
+    /** Duplica una estimación existente con nuevo ID y estado BORRADOR */
     suspend fun duplicarEstimacion(id: String): Result<String> {
-        val original = dao.getById(id)?.toDomain()
-            ?: return Result.failure(Exception("No encontrada"))
+        val original = dao.getById(id)?.toDomain() ?: return Result.failure(Exception("No encontrada"))
         val copia = original.copy(
-            id                  = UUID.randomUUID().toString(),
-            estado              = EstadoEstimacion.BORRADOR.name,
-            loteNombre          = "${original.loteNombre} (Copia)",
-            fechaCreacion       = System.currentTimeMillis(),
+            id = UUID.randomUUID().toString(),
+            estado = EstadoEstimacion.BORRADOR.name,
+            loteNombre = "${original.loteNombre} (Copia)",
+            fechaCreacion = System.currentTimeMillis(),
             costoRealRegistrado = 0.0,
             variacionPorcentaje = 0.0
         )
         return guardarEstimacion(copia)
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  INTEGRACIÓN CON INVENTARIO
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
+    //  Integración con INVENTARIO
+    // ═══════════════════════════════════════════════════════════════════════
 
+    /**
+     * Obtiene productos del inventario filtrando por categoría.
+     * Se usa para autocompletar fases y artículos sanitarios.
+     */
     fun obtenerProductosInventario(): Flow<List<ProductoInventario>> =
         inventarioRepo.obtenerProductos()
 
+    /**
+     * Fuerza una sincronización inmediata del inventario con Firestore.
+     * Útil para llamar al abrir el formulario de Costos y garantizar que los
+     * spinners reflejen el estado actual (sin productos fantasma de syncs antiguos).
+     */
+    suspend fun forzarSincronizacionInventario(): Result<Unit> =
+        inventarioRepo.forzarSincronizacionRemota()
+
+    /**
+     * Carga el precio y stock real de cada fase desde el inventario.
+     * Llamar antes de mostrar el formulario de edición.
+     */
     suspend fun enriquecerFasesConInventario(
         fases: List<FaseAlimentacion>,
         productos: List<ProductoInventario>
-    ): List<FaseAlimentacion> = fases.map { fase ->
-        if (fase.productoInventarioId.isEmpty()) return@map fase
-        val producto = productos.firstOrNull { it.id == fase.productoInventarioId }
-            ?: return@map fase
-        fase.copy(
-            precioKg        = producto.precioUnitario,
-            productoNombre  = producto.nombre,
-            stockDisponible = producto.cantidad
-        )
+    ): List<FaseAlimentacion> {
+        return fases.map { fase ->
+            if (fase.productoInventarioId.isNotEmpty()) {
+                val producto = productos.firstOrNull { it.id == fase.productoInventarioId }
+                if (producto != null) {
+                    fase.copy(
+                        precioKg = producto.precioUnitario,
+                        productoNombre = producto.nombre,
+                        stockDisponible = producto.cantidad
+                    )
+                } else fase
+            } else fase
+        }
     }
 
     suspend fun enriquecerItemsSanitariosConInventario(
         items: List<ItemSanitario>,
         productos: List<ProductoInventario>
-    ): List<ItemSanitario> = items.map { item ->
-        if (item.productoInventarioId.isEmpty()) return@map item
-        val producto = productos.firstOrNull { it.id == item.productoInventarioId }
-            ?: return@map item
-        item.copy(
-            precioUnitario  = producto.precioUnitario,
-            nombre          = producto.nombre,
-            stockDisponible = producto.cantidad
-        )
+    ): List<ItemSanitario> {
+        return items.map { item ->
+            if (item.productoInventarioId.isNotEmpty()) {
+                val producto = productos.firstOrNull { it.id == item.productoInventarioId }
+                if (producto != null) {
+                    item.copy(
+                        precioUnitario = producto.precioUnitario,
+                        nombre = producto.nombre,
+                        stockDisponible = producto.cantidad
+                    )
+                } else item
+            } else item
+        }
     }
 
     /**
-     * Verifica si el inventario tiene suficiente stock para cubrir
-     * todos los insumos de la estimación ANTES de descontarlos.
-     *
-     * @return Lista de descripciones de los insumos con stock insuficiente.
-     *         Si está vacía, el inventario es suficiente para activar la producción.
-     */
-    suspend fun verificarStockParaProduccion(
-        estimacion: EstimacionCostos,
-        productosActuales: List<ProductoInventario>
-    ): List<String> {
-        val insuficientes = mutableListOf<String>()
-
-        // Verificar fases de alimentación
-        estimacion.fases.forEach { fase ->
-            if (fase.productoInventarioId.isEmpty()) return@forEach
-            val producto = productosActuales.firstOrNull { it.id == fase.productoInventarioId }
-                ?: return@forEach
-            val consumoNecesario = fase.consumoTotalKg(estimacion.cantidadAves)
-            if (producto.cantidad < consumoNecesario) {
-                val falta = consumoNecesario - producto.cantidad
-                insuficientes.add(
-                    "• ${fase.nombre} (${fase.productoNombre.ifEmpty { producto.nombre }}): " +
-                            "necesita ${String.format("%.1f", consumoNecesario)} ${producto.unitType}, " +
-                            "disponible ${String.format("%.1f", producto.cantidad)} ${producto.unitType} " +
-                            "(faltan ${String.format("%.1f", falta)} ${producto.unitType})"
-                )
-            }
-        }
-
-        // Verificar ítems sanitarios
-        estimacion.itemsSanitarios.forEach { item ->
-            if (item.productoInventarioId.isEmpty()) return@forEach
-            val producto = productosActuales.firstOrNull { it.id == item.productoInventarioId }
-                ?: return@forEach
-            if (producto.cantidad < item.dosisParaLote) {
-                val falta = item.dosisParaLote - producto.cantidad
-                insuficientes.add(
-                    "• ${item.nombre}: " +
-                            "necesita ${String.format("%.1f", item.dosisParaLote)} ${producto.unitType}, " +
-                            "disponible ${String.format("%.1f", producto.cantidad)} ${producto.unitType} " +
-                            "(faltan ${String.format("%.1f", falta)} ${producto.unitType})"
-                )
-            }
-        }
-
-        return insuficientes
-    }
-
-    /**
-     * Descuenta los insumos del inventario al activar la producción.
-     * Solo descuenta los que tengan stock suficiente; los insuficientes
-     * se omiten (deben haberse verificado antes con verificarStockParaProduccion).
+     * Descuenta productos del inventario cuando una estimación
+     * se convierte en producción real.
      */
     suspend fun descontarInventarioParaProduccion(
         estimacion: EstimacionCostos,
@@ -159,30 +142,34 @@ class CostosRepository(context: Context) {
     ): Result<Unit> {
         return try {
             estimacion.fases.forEach { fase ->
-                if (fase.productoInventarioId.isEmpty()) return@forEach
-                val producto = productosActuales.firstOrNull { it.id == fase.productoInventarioId }
-                    ?: return@forEach
-                val consumo    = fase.consumoTotalKg(estimacion.cantidadAves)
-                val nuevoStock = producto.cantidad - consumo
-                if (nuevoStock >= 0) {
-                    inventarioRepo.actualizarProducto(
-                        producto,
-                        producto.copy(cantidad = nuevoStock),
-                        "Activación de producción: ${estimacion.loteNombre}"
-                    )
+                if (fase.productoInventarioId.isNotEmpty()) {
+                    val producto = productosActuales.firstOrNull { it.id == fase.productoInventarioId }
+                    if (producto != null) {
+                        val consumo = fase.consumoTotalKg(estimacion.cantidadAves)
+                        val nuevoStock = producto.cantidad - consumo
+                        if (nuevoStock >= 0) {
+                            inventarioRepo.actualizarProducto(
+                                producto,
+                                producto.copy(cantidad = nuevoStock),
+                                "Descuento por estimación: ${estimacion.loteNombre}"
+                            )
+                        }
+                    }
                 }
             }
             estimacion.itemsSanitarios.forEach { item ->
-                if (item.productoInventarioId.isEmpty()) return@forEach
-                val producto = productosActuales.firstOrNull { it.id == item.productoInventarioId }
-                    ?: return@forEach
-                val nuevoStock = producto.cantidad - item.dosisParaLote
-                if (nuevoStock >= 0) {
-                    inventarioRepo.actualizarProducto(
-                        producto,
-                        producto.copy(cantidad = nuevoStock),
-                        "Sanitario — Activación: ${estimacion.loteNombre}"
-                    )
+                if (item.productoInventarioId.isNotEmpty()) {
+                    val producto = productosActuales.firstOrNull { it.id == item.productoInventarioId }
+                    if (producto != null) {
+                        val nuevoStock = producto.cantidad - item.dosisParaLote
+                        if (nuevoStock >= 0) {
+                            inventarioRepo.actualizarProducto(
+                                producto,
+                                producto.copy(cantidad = nuevoStock),
+                                "Sanitario por estimación: ${estimacion.loteNombre}"
+                            )
+                        }
+                    }
                 }
             }
             Result.success(Unit)
@@ -191,61 +178,67 @@ class CostosRepository(context: Context) {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  INTEGRACIÓN CON FINANZAS
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
+    //  Integración con FINANZAS
+    // ═══════════════════════════════════════════════════════════════════════
 
+    /**
+     * Envía el costo total estimado a Finanzas como transacción proyectada.
+     * Crea un gasto con estado PENDIENTE para comparar con el real después.
+     */
     suspend fun enviarCostoAFinanzas(estimacion: EstimacionCostos): Result<String> {
         val transaccion = Transaccion(
-            tipo        = TipoTransaccion.GASTO.name,
-            categoria   = CategoriaGasto.OTRO_GASTO.name,
-            descripcion = "Estimación de costos: ${estimacion.loteNombre} " +
-                    "(${estimacion.cantidadAves} aves / ${estimacion.diasCrianza} días)",
-            monto       = estimacion.costoTotal,
-            estado      = EstadoPago.PENDIENTE.name,
-            fechaMs     = System.currentTimeMillis(),
-            loteId      = estimacion.loteId,
-            notas       = "ROI estimado: ${String.format("%.1f", estimacion.roi)}% | " +
-                    "Ganancia estimada: Q${String.format("%.2f", estimacion.gananciaNeta)}"
+            tipo = TipoTransaccion.GASTO.name,
+            categoria = CategoriaGasto.OTRO_GASTO.name,
+            descripcion = "Estimación de costos: ${estimacion.loteNombre} (${estimacion.cantidadAves} aves / ${estimacion.diasCrianza} días)",
+            monto = estimacion.costoTotal,
+            estado = EstadoPago.PENDIENTE.name,
+            fechaMs = System.currentTimeMillis(),
+            loteId = estimacion.loteId,
+            notas = "ROI estimado: ${String.format("%.1f", estimacion.roi)}% | Ganancia estimada: Q${String.format("%.2f", estimacion.gananciaNeta)}"
         )
         return finanzasRepo.agregarTransaccion(transaccion)
     }
 
-    suspend fun actualizarCostoReal(
-        estimacion: EstimacionCostos,
-        costoReal: Double
-    ): Result<Unit> {
-        val variacion = if (estimacion.costoTotal > 0.0)
-            ((costoReal - estimacion.costoTotal) / estimacion.costoTotal) * 100.0
+    /**
+     * Compara el costo estimado con las transacciones reales de ese lote en Finanzas.
+     * Retorna la variación porcentual.
+     */
+    suspend fun actualizarCostoReal(estimacion: EstimacionCostos, costoReal: Double): Result<Unit> {
+        val variacion = if (estimacion.costoTotal > 0)
+            ((costoReal - estimacion.costoTotal) / estimacion.costoTotal) * 100
         else 0.0
         val actualizada = estimacion.copy(
             costoRealRegistrado = costoReal,
             variacionPorcentaje = variacion,
-            estado              = EstadoEstimacion.COMPLETADA.name
+            estado = EstadoEstimacion.COMPLETADA.name
         )
-        return guardarEstimacion(actualizada).fold(
-            onSuccess = { Result.success(Unit) },
-            onFailure = { Result.failure(it) }
-        )
+        return guardarEstimacion(actualizada).map { }
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    //  INTEGRACIÓN CON AVES / LOTES
-    // ══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
+    //  Integración con AVES / LOTES
+    // ═══════════════════════════════════════════════════════════════════════
 
     fun obtenerLotesActivos(): Flow<List<Lote>> = avesRepo.getLotesActivos()
 
+    /**
+     * Recalcula la pérdida económica cuando se registra mortalidad en un lote
+     * que tiene una estimación activa vinculada.
+     */
     suspend fun recalcularPorMortalidad(
         loteId: String,
         nuevaMortalidadRegistrada: Int,
         costoPorAve: Double
     ): Result<Unit> {
         return try {
+            val estimaciones = dao.getPorLote(loteId)
+            // Se resuelve en el ViewModel; aquí solo registramos la pérdida en Finanzas
             finanzasRepo.registrarPerdidaMortalidad(
-                galponId         = loteId,
-                cantidadBajas    = nuevaMortalidadRegistrada,
+                galponId = loteId,
+                cantidadBajas = nuevaMortalidadRegistrada,
                 costoPromedioAve = costoPorAve,
-                motivo           = "Mortalidad registrada en lote"
+                motivo = "Mortalidad registrada en lote"
             )
             Result.success(Unit)
         } catch (e: Exception) {

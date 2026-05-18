@@ -24,7 +24,10 @@ class SyncWorker(
             // 1. PUSH: Subir cambios locales no sincronizados
             pushLocalChanges()
 
-            // 2. PULL: Descargar cambios remotos
+            // 2. PUSH DELETES: Procesar borrados pendientes (offline)
+            pushPendingDeletes()
+
+            // 3. PULL: Descargar cambios remotos Y reconciliar borrados
             pullRemoteChanges()
 
             Result.success()
@@ -42,16 +45,39 @@ class SyncWorker(
         }
     }
 
+    /**
+     * Procesa los borrados que quedaron pendientes (cuando el usuario eliminó
+     * un producto sin conexión a internet). Los IDs se guardan en SharedPreferences.
+     */
+    private suspend fun pushPendingDeletes() {
+        val prefs = applicationContext.getSharedPreferences("pending_deletes", Context.MODE_PRIVATE)
+        val pendingIds = prefs.getStringSet("inventario", emptySet())?.toMutableSet() ?: mutableSetOf()
+        if (pendingIds.isEmpty()) return
+
+        val confirmados = mutableSetOf<String>()
+        for (id in pendingIds) {
+            try {
+                colProductos.document(id).delete().await()
+                confirmados.add(id)
+            } catch (_: Exception) {
+                // Si falla, se reintenta en el próximo sync. No bloqueamos los demás.
+            }
+        }
+        if (confirmados.isNotEmpty()) {
+            pendingIds.removeAll(confirmados)
+            prefs.edit().putStringSet("inventario", pendingIds).apply()
+        }
+    }
+
     private suspend fun pullRemoteChanges() {
         val snapshot = colProductos.get().await()
         val remoteProductos = snapshot.documents.mapNotNull { doc ->
             doc.toObject(ProductoInventario::class.java)?.copy(id = doc.id)
         }
 
-        // Guardar todo en local (esto sobrescribe local con lo de la nube)
-        // En una implementación más avanzada, compararíamos timestamps.
+        // FIX: usar el método transaccional que también ELIMINA locales obsoletos
         val entities = remoteProductos.map { ProductoEntity.fromDomain(it, true) }
-        dao.insertAll(entities)
+        dao.reconciliarConRemoto(entities)
     }
 
     private fun productoToMap(p: ProductoInventario): Map<String, Any> = mapOf(
